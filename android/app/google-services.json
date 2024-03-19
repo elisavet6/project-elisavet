@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "375744483467",
+    "project_id": "project1-6d4bc",
+    "storage_bucket": "project1-6d4bc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375744483467:android:13e0cf78059cebc0c7048e",
+        "android_client_info": {
+          "package_name": "com.elisavet.iq_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "375744483467-a8og3f512rr4u2g5r4eqakc3j9fc6r22.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi3igJojXc7K1zKHO2zeJ4qKV57EyPSgs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "375744483467-a8og3f512rr4u2g5r4eqakc3j9fc6r22.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
