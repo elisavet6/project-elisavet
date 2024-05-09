@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:iq_project/eggrafh.dart';
-import 'package:iq_project/services/auth.dart';
+import 'package:iq_project/components/eggrafh.dart';
 
-// void main() {
-//   runApp(login());
-// }
+import 'package:iq_project/services/users.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import 'package:iq_project/components/forgot_pw.dart';
+
+void main() {
+  runApp(login());
+}
 
 class login extends StatefulWidget {
   @override
@@ -87,9 +94,29 @@ class _loginState extends State<login> {
 }
 
 //Periexomeno plaisiou (pedia symplhrwshs)
-class YourContent extends StatelessWidget {
-  bool isChecked = false;
+class YourContent extends StatefulWidget {
   @override
+  State<YourContent> createState() => _YourContentState();
+}
+
+class _YourContentState extends State<YourContent> {
+  bool passwordVisible = true;
+  bool isChecked = false;
+  TextEditingController emailcontroll = TextEditingController();
+  TextEditingController passwordcontroll = TextEditingController();
+  Future SignIn() async {
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailcontroll.text.trim(),
+        password: passwordcontroll.text.trim());
+  }
+
+  @override
+  void dispose() {
+    emailcontroll.dispose();
+    passwordcontroll.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -108,11 +135,13 @@ class YourContent extends StatelessWidget {
               style: TextStyle(
                   color: Colors.orange.shade700, fontSize: 30, height: 2),
             ),
+
             SizedBox(height: 15),
 
             Column(
               children: <Widget>[
                 TextField(
+                  controller: emailcontroll,
                   decoration: InputDecoration(
                     icon: Icon(Icons.person),
                     hintText: "Enter your email",
@@ -122,11 +151,28 @@ class YourContent extends StatelessWidget {
                   height: 20,
                 ),
                 TextField(
+                  obscureText: passwordVisible,
+                  controller: passwordcontroll,
                   decoration: InputDecoration(
                     icon: Icon(
                       Icons.vpn_key,
                     ),
                     hintText: "Enter your password",
+                    suffixIcon: IconButton(
+                      color: Colors.grey,
+                      icon: Icon(
+                        passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(
+                          () {
+                            passwordVisible = !passwordVisible;
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -148,7 +194,12 @@ class YourContent extends StatelessWidget {
                   ],
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return ForgotPassword();
+                    }));
+                  },
                   child: Text("Forgot your password?"),
                   style: TextButton.styleFrom(primary: Colors.grey),
                 ),
@@ -159,7 +210,9 @@ class YourContent extends StatelessWidget {
               margin: EdgeInsets.all(10),
               padding: EdgeInsets.all(5),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  SignIn();
+                },
                 child: Text("Sign In"),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.all(5),

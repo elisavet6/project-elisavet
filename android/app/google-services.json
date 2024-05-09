@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "375744483467",
-    "project_id": "project1-6d4bc",
-    "storage_bucket": "project1-6d4bc.appspot.com"
+    "project_number": "324005805909",
+    "project_id": "urban-tickets-c05e6",
+    "storage_bucket": "urban-tickets-c05e6.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:375744483467:android:13e0cf78059cebc0c7048e",
+        "mobilesdk_app_id": "1:324005805909:android:02a753cc68279bb24679dc",
         "android_client_info": {
           "package_name": "com.elisavet.iq_project"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "375744483467-a8og3f512rr4u2g5r4eqakc3j9fc6r22.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBi3igJojXc7K1zKHO2zeJ4qKV57EyPSgs"
+          "current_key": "AIzaSyDFyxW6k2Uei6wgksbYRMPczH1OIeUEx58"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "375744483467-a8og3f512rr4u2g5r4eqakc3j9fc6r22.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

@@ -1,6 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:iq_project/landing_page.dart';
+import 'package:iq_project/components/landing_page.dart';
+import 'package:iq_project/components/login_2.dart';
+import 'package:iq_project/components/message_helper.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -14,14 +18,9 @@ class SignUpForm extends StatefulWidget {
 }
 
 class _SignUpFormState extends State<SignUpForm> {
-  String email = "",
-      name = "",
-      password = "",
-      lastName = "",
-      date = "",
-      country = "",
-      language = "",
-      phoneNumber = "";
+  final CountryCodePick = const FlCountryCodePicker();
+  CountryCode? countryCode;
+
   TextEditingController emailcontroller = TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
   TextEditingController namecontroller = TextEditingController();
@@ -30,58 +29,102 @@ class _SignUpFormState extends State<SignUpForm> {
   TextEditingController countrycontroller = TextEditingController();
   TextEditingController languagecontroller = TextEditingController();
   TextEditingController phoneNumbercontroller = TextEditingController();
+  TextEditingController confirmPwcontroller = TextEditingController();
+  TextEditingController code = TextEditingController();
 
-  registration() async {
-    if (password != "" &&
-        namecontroller.text != "" &&
-        emailcontroller.text != "") {
+  Future<void> addUser(UserCredential? userCredential) async {
+    if (userCredential != null && userCredential.user != null) {
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userCredential.user!.email)
+          .set({
+        'name': namecontroller.text.trim(),
+        'lastname': lastNamecontroller.text.trim(),
+        'date': datecontroller.text.trim(),
+        'country': countrycontroller.text.trim(),
+        'language': languagecontroller.text.trim(),
+        'phoneNumber': phoneNumbercontroller.text.trim(),
+        'email': emailcontroller.text.trim(),
+      });
+    }
+  }
+
+  Future signUp() async {
+    if (_formKey.currentState!.validate()) {
       try {
-        UserCredential userCredential = await FirebaseAuth.instance
-            .createUserWithEmailAndPassword(email: email, password: password);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-          "Registered Successfully",
-          style: TextStyle(fontSize: 20.0),
-        )));
-        // ignore: use_build_context_synchronously
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Home()));
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'weak-password') {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              backgroundColor: Colors.orangeAccent,
-              content: Text(
-                "Password Provided is too Weak",
-                style: TextStyle(fontSize: 18.0),
-              )));
-        } else if (e.code == "email-already-in-use") {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              backgroundColor: Colors.orangeAccent,
-              content: Text(
-                "Account Already exists",
-                style: TextStyle(fontSize: 18.0),
-              )));
+        if (passwordcontroller.text.trim() == confirmPwcontroller.text.trim()) {
+          UserCredential? userCredential = await FirebaseAuth.instance
+              .createUserWithEmailAndPassword(
+                  email: emailcontroller.text.trim(),
+                  password: passwordcontroller.text.trim());
+          addUser(userCredential);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    Home()), // Ensure 'Home' is properly defined and expecting no mandatory arguments.
+          );
+        } else {
+          ShowMessageHelper.showMessage(
+              context: context, text: "The confirmed password doesn't match");
         }
+      } catch (e) {
+        ShowMessageHelper.showMessage(
+            context: context, text: "Failed to sign up: $e");
       }
     }
   }
 
-  final _formKey = GlobalKey<FormState>();
+  void dispose() {
+    emailcontroller.dispose();
+    namecontroller.dispose();
+    lastNamecontroller.dispose();
+    datecontroller.dispose();
+    languagecontroller.dispose();
+    countrycontroller.dispose();
+    phoneNumbercontroller.dispose();
+    super.dispose();
+  }
 
+  final _formKey = GlobalKey<FormState>();
+  bool passwordVisible = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Sign Up'),
         backgroundColor: Colors.orange.shade700,
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              const Text(
+                'Are you a member?,',
+                style: TextStyle(fontSize: 15),
+              ),
+              TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => login_2()),
+                    );
+                  },
+                  child: const Text('Sign In',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          decoration: TextDecoration.underline)))
+            ],
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Center(
           child: Container(
             padding: EdgeInsets.all(40.0),
             width: 900,
-            key: _formKey,
             child: Form(
+              key: _formKey,
               child: Column(
                 children: <Widget>[
                   SizedBox(height: 30),
@@ -145,6 +188,7 @@ class _SignUpFormState extends State<SignUpForm> {
                       if (value == null || value.isEmpty) {
                         return 'Enter your Birth Date';
                       }
+                      return null;
                     },
                   ),
                   SizedBox(height: 20),
@@ -187,13 +231,44 @@ class _SignUpFormState extends State<SignUpForm> {
                   TextFormField(
                     controller: phoneNumbercontroller,
                     decoration: InputDecoration(
-                      labelText: "Phone Number *",
-                      floatingLabelStyle:
-                          TextStyle(color: Colors.orange.shade700),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.orange.shade700),
-                      ),
-                    ),
+                        labelText: "Phone Number *",
+                        floatingLabelStyle:
+                            TextStyle(color: Colors.orange.shade700),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.orange.shade700),
+                        ),
+                        prefixIcon: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 6),
+                          // margin: const EdgeInsets.symmetric(horizontal: 1),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              GestureDetector(
+                                onTap: () async {
+                                  final code = await CountryCodePick.showPicker(
+                                      context: context);
+                                  if (code != null) {
+                                    setState(() {
+                                      countryCode = code;
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 6),
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey.shade600,
+                                      borderRadius: BorderRadius.circular(5)),
+                                  child: Text(
+                                    countryCode?.dialCode ?? "+1",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        )),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Enter your Phone Number';
@@ -238,17 +313,80 @@ class _SignUpFormState extends State<SignUpForm> {
                       return null;
                     },
                   ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: confirmPwcontroller,
+                    obscureText: passwordVisible,
+                    decoration: InputDecoration(
+                      labelText: "Confirm Password *",
+                      floatingLabelStyle:
+                          TextStyle(color: Colors.orange.shade700),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.orange.shade700),
+                      ),
+                      suffixIcon: IconButton(
+                        color: Colors.grey,
+                        icon: Icon(
+                          passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(
+                            () {
+                              passwordVisible = !passwordVisible;
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Enter your First Name';
+                      }
+                      return null;
+                    },
+                  ),
                   SizedBox(height: 35),
                   ElevatedButton(
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        setState(() {
-                          email = emailcontroller.text;
-                          name = namecontroller.text;
-                          password = passwordcontroller.text;
-                        });
+                      if (namecontroller.text.isEmpty) {
+                        ShowMessageHelper.showMessage(
+                            context: context,
+                            text: "Please enter your First Name!");
+                      } else if (lastNamecontroller.text.isEmpty) {
+                        ShowMessageHelper.showMessage(
+                            context: context,
+                            text: "Please enter your Last Name!");
+                      } else if (datecontroller.text.isEmpty) {
+                        ShowMessageHelper.showMessage(
+                            context: context,
+                            text: "Please enter your birth date!");
+                      } else if (countrycontroller.text.isEmpty) {
+                        ShowMessageHelper.showMessage(
+                            context: context,
+                            text: "Please enter your country!");
+                      } else if (languagecontroller.text.isEmpty) {
+                        ShowMessageHelper.showMessage(
+                            context: context,
+                            text: "Please enter your language!");
+                      } else if (phoneNumbercontroller.text.isEmpty) {
+                        ShowMessageHelper.showMessage(
+                            context: context,
+                            text: "Please enter your phone number!");
+                      } else if (emailcontroller.text.isEmpty) {
+                        ShowMessageHelper.showMessage(
+                            context: context, text: "Please enter your email!");
+                      } else if (passwordcontroller.text.isEmpty) {
+                        ShowMessageHelper.showMessage(
+                            context: context, text: "Please enter a password!");
+                      } else if (confirmPwcontroller.text.isEmpty) {
+                        ShowMessageHelper.showMessage(
+                            context: context,
+                            text: "Please confirm your password!");
+                      } else {
+                        signUp();
                       }
-                      registration();
                     },
                     child: Text('Sign Up'),
                     style: ElevatedButton.styleFrom(
@@ -286,10 +424,9 @@ class _SignUpFormState extends State<SignUpForm> {
         // Check if the selected date makes the user younger than 16 years old
         if (_picked.isAfter(minDate)) {
           // Show a message if the age is younger than 16 years old
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('You must be at least 16 years old to register')),
-          );
+          ShowMessageHelper.showMessage(
+              context: context,
+              text: "You must be at least 16 years old to register");
         } else {
           // Update the text field if the age is valid
           datecontroller.text = _picked.toString().split(" ")[0];
