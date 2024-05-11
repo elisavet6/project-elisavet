@@ -1,5 +1,3 @@
-import 'dart:js';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -36,5 +34,14 @@ class UserServices {
         .doc(currentUser!.email)
         .get();
   }
-//current user
+
+//delete user
+  Future<void> deleteUser(String email) async {
+    try {
+      await Users.doc(email).delete();
+    } catch (e) {
+      print("Error deleting user: $e");
+      throw e;
+    }
+  }
 }

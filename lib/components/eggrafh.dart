@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_country_code_picker/fl_country_code_picker.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:iq_project/components/landing_page.dart';
 import 'package:iq_project/components/login_2.dart';
 import 'package:iq_project/components/message_helper.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MaterialApp(
@@ -31,6 +34,9 @@ class _SignUpFormState extends State<SignUpForm> {
   TextEditingController phoneNumbercontroller = TextEditingController();
   TextEditingController confirmPwcontroller = TextEditingController();
   TextEditingController code = TextEditingController();
+
+  List<String> _countries = [];
+  List<String> _filteredCountries = [];
 
   Future<void> addUser(UserCredential? userCredential) async {
     if (userCredential != null && userCredential.user != null) {

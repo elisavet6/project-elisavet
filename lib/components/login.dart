@@ -105,6 +105,7 @@ class _YourContentState extends State<YourContent> {
   TextEditingController emailcontroll = TextEditingController();
   TextEditingController passwordcontroll = TextEditingController();
   Future SignIn() async {
+    // if(emailcontroll!==UserServices().getUserDetails())
     await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailcontroll.text.trim(),
         password: passwordcontroll.text.trim());
@@ -135,9 +136,7 @@ class _YourContentState extends State<YourContent> {
               style: TextStyle(
                   color: Colors.orange.shade700, fontSize: 30, height: 2),
             ),
-
             SizedBox(height: 15),
-
             Column(
               children: <Widget>[
                 TextField(
@@ -180,19 +179,9 @@ class _YourContentState extends State<YourContent> {
             SizedBox(
               height: 20,
             ),
-            // remember me
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      'Remember me',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    checkExample(),
-                  ],
-                ),
                 TextButton(
                   onPressed: () {
                     Navigator.push(context,
@@ -238,29 +227,6 @@ class _YourContentState extends State<YourContent> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class checkExample extends StatefulWidget {
-  const checkExample({super.key});
-
-  @override
-  State<checkExample> createState() => _checkExampleState();
-}
-
-class _checkExampleState extends State<checkExample> {
-  bool isChecked = false;
-  @override
-  Widget build(BuildContext context) {
-    return Checkbox(
-      checkColor: Colors.grey,
-      value: isChecked,
-      onChanged: (bool? value) {
-        setState(() {
-          isChecked = value!;
-        });
-      },
     );
   }
 }

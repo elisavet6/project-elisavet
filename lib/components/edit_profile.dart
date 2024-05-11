@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:iq_project/components/TextBox.dart';
+import 'package:iq_project/components/login_2.dart';
 import 'package:iq_project/services/users.dart';
 
 class MyProfile extends StatefulWidget {
@@ -20,25 +21,11 @@ class _MyProfileState extends State<MyProfile> {
   final usersCollection = FirebaseFirestore.instance.collection('Users');
   Map<String, dynamic>? userData;
 
-  @override
-  // void initState() {
-  //   super.initState();
-  //   loadUserData();
-  // }
-
-  // Initial fetch and setup of local user data
-  // Future<void> loadUserData() async {
-  //   var doc = await usersCollection.doc(currentUser.email).get();
-  //   setState(() {
-  //     userData = doc.data();
-  //   });
-  // }
-
-// get the users details
+  // get the users details
   Future<DocumentSnapshot<Map<String, dynamic>>> getUserDetails() async {
     return await FirebaseFirestore.instance
         .collection('Users')
-        .doc(currentUser!.email)
+        .doc(currentUser.email)
         .get();
   }
 
@@ -54,10 +41,10 @@ class _MyProfileState extends State<MyProfile> {
         ),
         content: TextField(
           autofocus: true,
-          style: TextStyle(color: Colors.black),
+          style: const TextStyle(color: Colors.black),
           decoration: InputDecoration(
               hintText: "Enter a new $field",
-              hintStyle: TextStyle(color: Colors.grey)),
+              hintStyle: const TextStyle(color: Colors.grey)),
           onChanged: (value) {
             newValue = value;
           },
@@ -78,6 +65,44 @@ class _MyProfileState extends State<MyProfile> {
     }
   }
 
+  Future<void> deleteAccount() async {
+    // Show a confirmation dialog
+    bool confirm = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          "Confirm Delete",
+          style: TextStyle(color: Colors.orange),
+        ),
+        content: Text("Are you sure you want to delete your account?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != null && confirm) {
+      // Delete the user account
+      try {
+        await userServices.deleteUser(currentUser.email!);
+        await currentUser.delete();
+
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => login_2()));
+      } catch (e) {
+        // Handle errors
+        print("Error deleting account: $e");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,17 +113,9 @@ class _MyProfileState extends State<MyProfile> {
         body: StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('Users')
-                .doc(currentUser.email!)
+                .doc(currentUser.email)
                 .snapshots(),
             builder: (context, snapshot) {
-              //loading
-              //   if (snapshot.connectionState == ConnectionState.waiting) {
-              //     return const Center(
-              //       child: CircularProgressIndicator(),
-              //     );
-              //   }
-              //   //error
-              //  else
               if (snapshot.hasData) {
                 //extract data
                 final user = snapshot.data!.data() as Map<String, dynamic>?;
@@ -108,10 +125,10 @@ class _MyProfileState extends State<MyProfile> {
                   ),
                   Icon(
                     Icons.person,
-                    size: 50,
+                    size: 60,
                   ),
                   SizedBox(
-                    height: 30,
+                    height: 20,
                   ),
                   Text(
                     user!['email'],
@@ -123,9 +140,22 @@ class _MyProfileState extends State<MyProfile> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 20, bottom: 15),
-                    child: Text(
-                      'My Details',
-                      style: TextStyle(color: Colors.grey),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'My Details',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        ElevatedButton(
+                          onPressed: deleteAccount,
+                          child: Text("Delete Account"),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.red,
+                            textStyle: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -133,30 +163,30 @@ class _MyProfileState extends State<MyProfile> {
                   MyTextBox(
                       sectionName: 'First Name',
                       text: user['name'],
-                      onPressed: () => editField('First Name')),
+                      onPressed: () => editField('name')),
 
                   MyTextBox(
                       sectionName: 'Last Name',
                       text: user['lastname'],
-                      onPressed: () => editField('Last Name')),
+                      onPressed: () => editField('lastname')),
 
                   MyTextBox(
                       sectionName: 'Country',
                       text: user['country'],
-                      onPressed: () => editField('Country')),
+                      onPressed: () => editField('country')),
                   MyTextBox(
                       sectionName: 'Birth Date',
                       text: user['date'],
-                      onPressed: () => editField('Birth Date')),
+                      onPressed: () => editField('date')),
 
                   MyTextBox(
                       sectionName: 'Phone Number',
                       text: user['phoneNumber'],
-                      onPressed: () => editField('Phone Number')),
+                      onPressed: () => editField('phoneNumber')),
                   MyTextBox(
                       sectionName: 'Language',
                       text: user['language'],
-                      onPressed: () => editField('Language')),
+                      onPressed: () => editField('language')),
                   MyTextBox(
                       sectionName: 'Change your Password',
                       text: '',
