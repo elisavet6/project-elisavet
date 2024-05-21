@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:iq_project/components/anonymous_home.dart';
 import 'package:iq_project/components/eggrafh.dart';
+import 'package:iq_project/components/landing_page.dart';
+import 'package:iq_project/components/message_helper.dart';
 
 import 'package:iq_project/services/users.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,7 +13,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:iq_project/components/forgot_pw.dart';
 
 void main() {
-  runApp(login());
+  runApp(
+    login(),
+  );
 }
 
 class login extends StatefulWidget {
@@ -105,10 +110,24 @@ class _YourContentState extends State<YourContent> {
   TextEditingController emailcontroll = TextEditingController();
   TextEditingController passwordcontroll = TextEditingController();
   Future SignIn() async {
-    // if(emailcontroll!==UserServices().getUserDetails())
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailcontroll.text.trim(),
-        password: passwordcontroll.text.trim());
+        password: passwordcontroll.text.trim(),
+      );
+    } catch (e) {
+      String errorMessage = 'An error occurred';
+      if (e is FirebaseAuthException) {
+        if (e.code == 'user-not-found') {
+          errorMessage = 'No user found with this email';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = 'Incorrect password';
+        }
+      }
+      // Show the error message to the user
+      ShowMessageHelper.showMessage(
+          context: context, text: "Email or password is wrong");
+    }
   }
 
   @override
@@ -222,6 +241,17 @@ class _YourContentState extends State<YourContent> {
                 );
               },
               child: Text('Sign Up'),
+              style: TextButton.styleFrom(primary: Colors.grey),
+            ),
+            TextButton(
+              onPressed: () {
+                // await FirebaseAuth.instance.signInAnonymously();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Anonymous_Home()),
+                );
+              },
+              child: Text('or Sign in Anonymously'),
               style: TextButton.styleFrom(primary: Colors.grey),
             )
           ],

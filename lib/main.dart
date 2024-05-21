@@ -11,5 +11,8 @@ Future<void> main() async {
   );
 
   runApp(MaterialApp(
-      home: login_2(), debugShowCheckedModeBanner: false, title: 'Login Page'));
+    home: login_2(),
+    debugShowCheckedModeBanner: false,
+    title: "Urban Ticket",
+  ));
 }

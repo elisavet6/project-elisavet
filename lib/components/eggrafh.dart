@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:csc_picker/model/select_status_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ import 'package:iq_project/components/landing_page.dart';
 import 'package:iq_project/components/login_2.dart';
 import 'package:iq_project/components/message_helper.dart';
 import 'package:http/http.dart' as http;
+import 'package:iq_project/models/countries.dart';
+import 'package:iq_project/services/users.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -33,10 +36,33 @@ class _SignUpFormState extends State<SignUpForm> {
   TextEditingController languagecontroller = TextEditingController();
   TextEditingController phoneNumbercontroller = TextEditingController();
   TextEditingController confirmPwcontroller = TextEditingController();
-  TextEditingController code = TextEditingController();
+  TextEditingController codecontroller = TextEditingController();
+  TextEditingController citycontroller = TextEditingController();
+  List<String> countryNames = [];
+  Map<String, List<String>> countryCities = {};
+  List<String> cities = [];
 
-  List<String> _countries = [];
-  List<String> _filteredCountries = [];
+  @override
+  void initState() {
+    super.initState();
+    getCountries();
+  }
+
+  Future<void> getCountries() async {
+    var response =
+        await http.get(Uri.https('countriesnow.space', 'api/v0.1/countries'));
+    var jsonData = jsonDecode(response.body);
+    List<TheCountry> countries = [];
+    for (var eachCountry in jsonData['data']) {
+      countries.add(TheCountry.fromJson(eachCountry));
+    }
+    setState(() {
+      countryNames = countries.map((country) => country.country).toList();
+      countryCities = {
+        for (var country in countries) country.country: country.cities
+      };
+    });
+  }
 
   Future<void> addUser(UserCredential? userCredential) async {
     if (userCredential != null && userCredential.user != null) {
@@ -48,8 +74,10 @@ class _SignUpFormState extends State<SignUpForm> {
         'lastname': lastNamecontroller.text.trim(),
         'date': datecontroller.text.trim(),
         'country': countrycontroller.text.trim(),
+        'city': citycontroller.text.trim(),
         'language': languagecontroller.text.trim(),
         'phoneNumber': phoneNumbercontroller.text.trim(),
+        'country code': codecontroller.text.trim(),
         'email': emailcontroller.text.trim(),
       });
     }
@@ -88,7 +116,9 @@ class _SignUpFormState extends State<SignUpForm> {
     datecontroller.dispose();
     languagecontroller.dispose();
     countrycontroller.dispose();
+    citycontroller.dispose();
     phoneNumbercontroller.dispose();
+    codecontroller.dispose();
     super.dispose();
   }
 
@@ -96,6 +126,7 @@ class _SignUpFormState extends State<SignUpForm> {
   bool passwordVisible = true;
   @override
   Widget build(BuildContext context) {
+    getCountries();
     return Scaffold(
       appBar: AppBar(
         title: Text('Sign Up'),
@@ -198,21 +229,72 @@ class _SignUpFormState extends State<SignUpForm> {
                     },
                   ),
                   SizedBox(height: 20),
-                  TextFormField(
-                    controller: countrycontroller,
-                    decoration: InputDecoration(
-                      labelText: "Country *",
-                      floatingLabelStyle:
-                          TextStyle(color: Colors.orange.shade700),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.orange.shade700),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Enter your Country';
+                  Autocomplete<String>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text == '') {
+                        return countryNames;
                       }
-                      return null;
+                      return countryNames.where((String country) {
+                        return country
+                            .toLowerCase()
+                            .contains(textEditingValue.text.toLowerCase());
+                      });
+                    },
+                    onSelected: (String selection) {
+                      setState(() {
+                        countrycontroller.text = selection;
+                        cities = countryCities[selection] ?? [];
+                      });
+                    },
+                    fieldViewBuilder: (BuildContext context, countrycontroller,
+                        FocusNode focusNode, VoidCallback onFieldSubmitted) {
+                      return TextFormField(
+                        controller: countrycontroller,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          labelText: "Country *",
+                          floatingLabelStyle:
+                              TextStyle(color: Colors.orange.shade700),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.orange.shade700),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  Autocomplete<String>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text == '') {
+                        return cities;
+                      }
+                      return cities.where((String city) {
+                        return city
+                            .toLowerCase()
+                            .contains(textEditingValue.text.toLowerCase());
+                      });
+                    },
+                    onSelected: (String selection) {
+                      setState(() {
+                        citycontroller.text = selection;
+                      });
+                    },
+                    fieldViewBuilder: (BuildContext context, citycontroller,
+                        FocusNode focusNode, VoidCallback onFieldSubmitted) {
+                      return TextFormField(
+                        controller: citycontroller,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          labelText: "City *",
+                          floatingLabelStyle:
+                              TextStyle(color: Colors.orange.shade700),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.orange.shade700),
+                          ),
+                        ),
+                      );
                     },
                   ),
                   SizedBox(height: 20),
@@ -257,6 +339,7 @@ class _SignUpFormState extends State<SignUpForm> {
                                   if (code != null) {
                                     setState(() {
                                       countryCode = code;
+                                      codecontroller.text = code.dialCode;
                                     });
                                   }
                                 },
@@ -310,6 +393,21 @@ class _SignUpFormState extends State<SignUpForm> {
                           TextStyle(color: Colors.orange.shade700),
                       focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.orange.shade700),
+                      ),
+                      suffixIcon: IconButton(
+                        color: Colors.grey,
+                        icon: Icon(
+                          passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(
+                            () {
+                              passwordVisible = !passwordVisible;
+                            },
+                          );
+                        },
                       ),
                     ),
                     validator: (value) {
@@ -376,6 +474,9 @@ class _SignUpFormState extends State<SignUpForm> {
                         ShowMessageHelper.showMessage(
                             context: context,
                             text: "Please enter your language!");
+                      } else if (citycontroller.text.isEmpty) {
+                        ShowMessageHelper.showMessage(
+                            context: context, text: "Please enter your City");
                       } else if (phoneNumbercontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
                             context: context,
@@ -386,6 +487,11 @@ class _SignUpFormState extends State<SignUpForm> {
                       } else if (passwordcontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
                             context: context, text: "Please enter a password!");
+                      } else if (passwordcontroller.text.length < 6) {
+                        ShowMessageHelper.showMessage(
+                            context: context,
+                            text:
+                                "Your password has to be at least 6 numbers or letters!");
                       } else if (confirmPwcontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
                             context: context,
