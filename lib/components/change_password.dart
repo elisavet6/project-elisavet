@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:iq_project/components/landing_page.dart';
-import 'package:iq_project/services/users.dart';
 
 class ChangePassword extends StatefulWidget {
   const ChangePassword({super.key});
@@ -15,9 +14,46 @@ class _ChangePasswordState extends State<ChangePassword> {
   TextEditingController newPasswordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   bool passwordVisible = true;
-  final UserServices userServices = UserServices();
   final currentUser = FirebaseAuth.instance.currentUser!;
   final _formKey = GlobalKey<FormState>();
+
+  Future<bool> _verifyOldPassword() async {
+    try {
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: currentUser.email!,
+        password: oldPasswordController.text,
+      );
+      await currentUser.reauthenticateWithCredential(credential);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<void> _changePassword() async {
+    try {
+      await currentUser.updatePassword(newPasswordController.text);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password changed successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Home()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Something went wrong with your new password'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,8 +196,21 @@ class _ChangePasswordState extends State<ChangePassword> {
                 margin: EdgeInsets.all(5),
                 padding: EdgeInsets.all(20),
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {}
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      // Επαλήθευση του παλαιού κωδικού μέσω Firebase Authentication
+                      bool oldPasswordValid = await _verifyOldPassword();
+                      if (oldPasswordValid) {
+                        await _changePassword();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Old password is incorrect'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
                   },
                   child: Text("Save changes"),
                   style: ElevatedButton.styleFrom(
@@ -181,36 +230,4 @@ class _ChangePasswordState extends State<ChangePassword> {
       ),
     );
   }
-
-  // Future<void> _changePassword() async {
-  //   try {
-  //     // Reauthenticate the user with their old password
-  //     AuthCredential credential = EmailAuthProvider.credential(
-  //         email: currentUser.email!, password: oldPasswordController.text);
-
-  //     await currentUser.reauthenticateWithCredential(credential);
-
-  //     // If reauthentication is successful, update the password
-  //     await currentUser.updatePassword(newPasswordController.text);
-
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('Password changed successfully'),
-  //         backgroundColor: Colors.green,
-  //       ),
-  //     );
-
-  //     Navigator.pushReplacement(
-  //       context,
-  //       MaterialPageRoute(builder: (context) => Home()),
-  //     );
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('Error: $e'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   }
-  // }
 }
