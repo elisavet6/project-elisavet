@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:iq_project/components/edit_profile.dart';
 import 'package:iq_project/components/landing_page.dart';
+import 'package:iq_project/components/login_2.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
@@ -55,15 +56,27 @@ class _MyDrawerState extends State<MyDrawer> {
         Padding(
           padding: const EdgeInsets.only(left: 20),
           child: ListTile(
-              leading: Icon(
-                Icons.logout,
-                color: Colors.white,
-              ),
-              title: Text(
-                "L O G  O U T",
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () => FirebaseAuth.instance.signOut()),
+            leading: Icon(
+              Icons.logout,
+              color: Colors.white,
+            ),
+            title: const Text(
+              "L O G  O U T",
+              style: TextStyle(color: Colors.white),
+            ),
+            onTap: () async {
+              try {
+                await FirebaseAuth.instance.signOut();
+                // Navigate to login page after successful sign out
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => login_2()),
+                );
+              } catch (e) {
+                print("Error signing out: $e");
+              }
+            },
+          ),
         ),
       ]),
     );

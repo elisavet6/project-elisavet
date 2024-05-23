@@ -122,8 +122,10 @@ class _SignUpFormState extends State<SignUpForm> {
     super.dispose();
   }
 
-  final _formKey = GlobalKey<FormState>();
   bool passwordVisible = true;
+  bool confirmVisible = true;
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     getCountries();
@@ -386,7 +388,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   SizedBox(height: 20),
                   TextFormField(
                     controller: passwordcontroller,
-                    obscureText: true,
+                    obscureText: passwordVisible,
                     decoration: InputDecoration(
                       labelText: "Password *",
                       floatingLabelStyle:
@@ -402,11 +404,9 @@ class _SignUpFormState extends State<SignUpForm> {
                               : Icons.visibility_off,
                         ),
                         onPressed: () {
-                          setState(
-                            () {
-                              passwordVisible = !passwordVisible;
-                            },
-                          );
+                          setState(() {
+                            passwordVisible = !passwordVisible;
+                          });
                         },
                       ),
                     ),
@@ -420,7 +420,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   SizedBox(height: 20),
                   TextFormField(
                     controller: confirmPwcontroller,
-                    obscureText: passwordVisible,
+                    obscureText: confirmVisible,
                     decoration: InputDecoration(
                       labelText: "Confirm Password *",
                       floatingLabelStyle:
@@ -431,16 +431,14 @@ class _SignUpFormState extends State<SignUpForm> {
                       suffixIcon: IconButton(
                         color: Colors.grey,
                         icon: Icon(
-                          passwordVisible
+                          confirmVisible
                               ? Icons.visibility
                               : Icons.visibility_off,
                         ),
                         onPressed: () {
-                          setState(
-                            () {
-                              passwordVisible = !passwordVisible;
-                            },
-                          );
+                          setState(() {
+                            confirmVisible = !confirmVisible;
+                          });
                         },
                       ),
                     ),

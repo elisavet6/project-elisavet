@@ -14,6 +14,8 @@ class _ChangePasswordState extends State<ChangePassword> {
   TextEditingController newPasswordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
   bool passwordVisible = true;
+  bool newPasswordVisible = true;
+  bool confirmPasswordVisible = true;
   final currentUser = FirebaseAuth.instance.currentUser!;
   final _formKey = GlobalKey<FormState>();
 
@@ -115,7 +117,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                 padding: EdgeInsets.symmetric(horizontal: 40),
                 child: TextFormField(
                   controller: newPasswordController,
-                  obscureText: passwordVisible,
+                  obscureText: newPasswordVisible,
                   decoration: InputDecoration(
                     labelText: "Enter your new password",
                     floatingLabelStyle:
@@ -126,14 +128,14 @@ class _ChangePasswordState extends State<ChangePassword> {
                     suffixIcon: IconButton(
                       color: Colors.grey,
                       icon: Icon(
-                        passwordVisible
+                        newPasswordVisible
                             ? Icons.visibility
                             : Icons.visibility_off,
                       ),
                       onPressed: () {
                         setState(
                           () {
-                            passwordVisible = !passwordVisible;
+                            newPasswordVisible = !newPasswordVisible;
                           },
                         );
                       },
@@ -157,7 +159,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                 padding: EdgeInsets.symmetric(horizontal: 40),
                 child: TextFormField(
                   controller: confirmPasswordController,
-                  obscureText: passwordVisible,
+                  obscureText: confirmPasswordVisible,
                   decoration: InputDecoration(
                     labelText: "Confirm your new password",
                     floatingLabelStyle:
@@ -168,14 +170,14 @@ class _ChangePasswordState extends State<ChangePassword> {
                     suffixIcon: IconButton(
                       color: Colors.grey,
                       icon: Icon(
-                        passwordVisible
+                        confirmPasswordVisible
                             ? Icons.visibility
                             : Icons.visibility_off,
                       ),
                       onPressed: () {
                         setState(
                           () {
-                            passwordVisible = !passwordVisible;
+                            confirmPasswordVisible = !confirmPasswordVisible;
                           },
                         );
                       },
