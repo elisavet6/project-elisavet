@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iq_project/components/anonymous_home.dart';
 import 'package:iq_project/components/eggrafh.dart';
 import 'package:iq_project/components/login_2.dart';
 
@@ -33,7 +34,7 @@ class _anonymous_drawerState extends State<anonymous_drawer> {
               style: TextStyle(color: Colors.white),
             ),
             onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (context) => anonymous_drawer())),
+                MaterialPageRoute(builder: (context) => Anonymous_Home())),
           ),
         ),
         Padding(

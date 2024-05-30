@@ -84,8 +84,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   MaterialPageRoute(builder: (context) => SignUpForm()),
                 );
               },
-              child: Text('Sign Up'),
-              style: TextButton.styleFrom(primary: Colors.grey),
+              child: Text(
+                'Sign Up',
+                style: TextStyle(color: Colors.grey),
+              ),
             )
           ],
         ));

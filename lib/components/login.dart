@@ -146,115 +146,123 @@ class _YourContentState extends State<YourContent> {
           topRight: Radius.circular(60),
         ),
       ),
-      child: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: <Widget>[
-            Text(
-              "Sign In",
-              style: TextStyle(
-                  color: Colors.orange.shade700, fontSize: 30, height: 2),
-            ),
-            SizedBox(height: 15),
-            Column(
-              children: <Widget>[
-                TextField(
-                  controller: emailcontroll,
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.person),
-                    hintText: "Enter your email",
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                TextField(
-                  obscureText: passwordVisible,
-                  controller: passwordcontroll,
-                  decoration: InputDecoration(
-                    icon: Icon(
-                      Icons.vpn_key,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: <Widget>[
+              Text(
+                "Sign In",
+                style: TextStyle(
+                    color: Colors.orange.shade700, fontSize: 30, height: 2),
+              ),
+              SizedBox(height: 15),
+              Column(
+                children: <Widget>[
+                  TextField(
+                    controller: emailcontroll,
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.person),
+                      hintText: "Enter your email",
                     ),
-                    hintText: "Enter your password",
-                    suffixIcon: IconButton(
-                      color: Colors.grey,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  TextField(
+                    obscureText: passwordVisible,
+                    controller: passwordcontroll,
+                    decoration: InputDecoration(
                       icon: Icon(
-                        passwordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                        Icons.vpn_key,
                       ),
-                      onPressed: () {
-                        setState(
-                          () {
-                            passwordVisible = !passwordVisible;
-                          },
-                        );
-                      },
+                      hintText: "Enter your password",
+                      suffixIcon: IconButton(
+                        color: Colors.grey,
+                        icon: Icon(
+                          passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(
+                            () {
+                              passwordVisible = !passwordVisible;
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return ForgotPassword();
+                      }));
+                    },
+                    child: Text(
+                      "Forgot your password?",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Container(
+                margin: EdgeInsets.all(10),
+                padding: EdgeInsets.all(5),
+                child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return ForgotPassword();
-                    }));
+                    SignIn();
                   },
-                  child: Text("Forgot your password?"),
-                  style: TextButton.styleFrom(primary: Colors.grey),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            Container(
-              margin: EdgeInsets.all(10),
-              padding: EdgeInsets.all(5),
-              child: ElevatedButton(
-                onPressed: () {
-                  SignIn();
-                },
-                child: Text("Sign In"),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.all(5),
-                  fixedSize: Size(300, 50),
-                  backgroundColor: Colors.orange.shade700,
-                  textStyle: TextStyle(fontWeight: FontWeight.bold),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                  child: Text("Sign In"),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.all(5),
+                    fixedSize: Size(300, 50),
+                    backgroundColor: Colors.orange.shade700,
+                    textStyle: TextStyle(fontWeight: FontWeight.bold),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
                 ),
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignUpForm()),
-                );
-              },
-              child: Text('Sign Up'),
-              style: TextButton.styleFrom(primary: Colors.grey),
-            ),
-            TextButton(
-              onPressed: () {
-                // await FirebaseAuth.instance.signInAnonymously();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Anonymous_Home()),
-                );
-              },
-              child: Text('or Sign in Anonymously'),
-              style: TextButton.styleFrom(primary: Colors.grey),
-            )
-          ],
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUpForm()),
+                  );
+                },
+                child: Text(
+                  'Sign Up',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  // await FirebaseAuth.instance.signInAnonymously();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Anonymous_Home()),
+                  );
+                },
+                child: Text(
+                  'or Sign in Anonymously',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

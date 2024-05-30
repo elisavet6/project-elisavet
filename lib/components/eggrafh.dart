@@ -94,9 +94,7 @@ class _SignUpFormState extends State<SignUpForm> {
           addUser(userCredential);
           Navigator.push(
             context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    Home()), // Ensure 'Home' is properly defined and expecting no mandatory arguments.
+            MaterialPageRoute(builder: (context) => Home()),
           );
         } else {
           ShowMessageHelper.showMessage(
@@ -138,7 +136,7 @@ class _SignUpFormState extends State<SignUpForm> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               const Text(
-                'Are you a member?,',
+                'Are you a member?',
                 style: TextStyle(fontSize: 15),
               ),
               TextButton(
@@ -413,6 +411,8 @@ class _SignUpFormState extends State<SignUpForm> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Enter your password';
+                      } else if (value.length < 6) {
+                        return 'Your password must be at least 6 characters';
                       }
                       return null;
                     },
@@ -500,7 +500,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     },
                     child: Text('Sign Up'),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.orange.shade700,
+                      backgroundColor: Colors.orange.shade700,
                       fixedSize: Size(300, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),

@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:iq_project/components/anonymous_drawer.dart';
 import 'package:iq_project/components/custom_button.dart';
-import 'package:iq_project/components/drawer.dart';
 import 'package:iq_project/components/eggrafh.dart';
 import 'package:iq_project/models/countries.dart';
 
@@ -22,8 +21,8 @@ class _Anonymous_HomeState extends State<Anonymous_Home> {
   List<String> cities = [];
   static const IconData directions_boat_outlined =
       IconData(0xefc2, fontFamily: 'MaterialIcons');
-  TextEditingController startingPoint = TextEditingController();
-  TextEditingController destination = TextEditingController();
+  String startCity = "";
+  String destCity = "";
   TextEditingController startingDate = TextEditingController();
   TextEditingController destinationDate = TextEditingController();
   DateTime? startDate;
@@ -70,7 +69,7 @@ class _Anonymous_HomeState extends State<Anonymous_Home> {
                     );
                   },
                   child: Text('Sign Up'),
-                  style: TextButton.styleFrom(primary: Colors.white),
+                  style: TextButton.styleFrom(foregroundColor: Colors.white),
                 ),
               ],
             )
@@ -129,12 +128,15 @@ class _Anonymous_HomeState extends State<Anonymous_Home> {
                                   textEditingValue.text.toLowerCase());
                             });
                           },
-                          fieldViewBuilder: (BuildContext context,
-                              startingPoint,
-                              FocusNode focusNode,
-                              VoidCallback onFieldSubmitted) {
+                          onSelected: (option) => setState(() {
+                            startCity = option;
+                          }),
+                          initialValue: TextEditingValue(text: startCity),
+                          fieldViewBuilder: (context, controller, focusNode,
+                              onFieldSubmitted) {
+                            controller.text = startCity;
                             return TextFormField(
-                              controller: startingPoint,
+                              controller: controller,
                               focusNode: focusNode,
                               decoration: InputDecoration(
                                 labelText: "Starting Point",
@@ -158,12 +160,11 @@ class _Anonymous_HomeState extends State<Anonymous_Home> {
                             size: 30.0,
                           ),
                           onPressed: () {
-                            final temp = destination.text;
-                            destination.text = startingPoint.text;
-                            startingPoint.text = temp;
-
-                            print(startingPoint.text);
-                            print(destination.text);
+                            setState(() {
+                              final temp = destCity;
+                              destCity = startCity;
+                              startCity = temp;
+                            });
                           },
                         ),
                       ),
@@ -181,12 +182,15 @@ class _Anonymous_HomeState extends State<Anonymous_Home> {
                                     textEditingValue.text.toLowerCase());
                               });
                             },
-                            fieldViewBuilder: (BuildContext context,
-                                destination,
-                                FocusNode focusNode,
-                                VoidCallback onFieldSubmitted) {
+                            onSelected: (option) => setState(() {
+                              destCity = option;
+                            }),
+                            initialValue: TextEditingValue(text: destCity),
+                            fieldViewBuilder: (context, controller, focusNode,
+                                onFieldSubmitted) {
+                              controller.text = destCity;
                               return TextFormField(
-                                controller: destination,
+                                controller: controller,
                                 focusNode: focusNode,
                                 decoration: InputDecoration(
                                   labelText: "Destination",
@@ -205,48 +209,49 @@ class _Anonymous_HomeState extends State<Anonymous_Home> {
                     ],
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      SizedBox(
-                        height: 5,
-                        width: 10,
+                      Row(
+                        children: [
+                          Text(
+                            "From:",
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              _selectDate();
+                            },
+                            icon: Icon(Icons.calendar_month),
+                            color: Colors.grey.shade600,
+                          ),
+                          Text(startingDate.text),
+                        ],
                       ),
-                      Text(
-                        "From:",
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          _selectDate();
-                        },
-                        icon: Icon(Icons.calendar_month),
-                        color: Colors.grey.shade600,
-                      ),
-                      Text(startingDate.text),
-                      SizedBox(
-                        width: 130,
-                      ),
-                      if (startingDate.text.isNotEmpty)
-                        Text(
-                          "Add a return date:",
-                          style: TextStyle(color: Colors.grey.shade600),
-                        ),
-                      if (startingDate.text.isNotEmpty)
-                        Switch(
-                            value: isSwitched,
-                            onChanged: (value) async {
-                              setState(() {
-                                isSwitched = value;
-                              });
+                      Row(
+                        children: [
+                          if (startingDate.text.isNotEmpty)
+                            Text(
+                              "Add a return date:",
+                              style: TextStyle(color: Colors.grey.shade600),
+                            ),
+                          if (startingDate.text.isNotEmpty)
+                            Switch(
+                                value: isSwitched,
+                                onChanged: (value) async {
+                                  setState(() {
+                                    isSwitched = value;
+                                  });
 
-                              if (isSwitched) {
-                                await _selectReturn();
-                              } else {
-                                setState(() {
-                                  destinationDate.clear();
-                                });
-                              }
-                            }),
+                                  if (isSwitched) {
+                                    await _selectReturn();
+                                  } else {
+                                    setState(() {
+                                      destinationDate.clear();
+                                    });
+                                  }
+                                }),
+                        ],
+                      )
                     ],
                   ),
                   if (isSwitched)

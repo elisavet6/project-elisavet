@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:iq_project/services/api_ose.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:iq_project/components/drawer.dart';
 import 'package:iq_project/components/custom_button.dart';
-import 'package:iq_project/models/countries.dart';
+
+import 'package:iq_project/models/train_destinations.dart';
 import 'package:iq_project/services/users.dart';
-import 'package:iq_project/components/custom_button.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -29,6 +29,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final UserServices userServices = UserServices();
   final User? currentUser = FirebaseAuth.instance.currentUser!;
+  final ApiService apiService = ApiService();
 
   TextEditingController startingPoint = TextEditingController();
   TextEditingController destination = TextEditingController();
@@ -37,8 +38,8 @@ class _HomeState extends State<Home> {
   DateTime? startDate;
   final user = FirebaseAuth.instance.currentUser!;
   bool isSwitched = false;
-
   List<String> greeceCities = [];
+
   List<String> countryNames = [];
   Map<String, List<String>> countryCities = {};
   List<String> cities = [];
@@ -48,28 +49,25 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    getGreekCities();
   }
 
-  Future<void> getGreekCities() async {
-    var response =
-        await http.get(Uri.https('countriesnow.space', 'api/v0.1/countries'));
-    var jsonData = jsonDecode(response.body);
-    List<TheCountry> countries = [];
-    for (var eachCountry in jsonData['data']) {
-      countries.add(TheCountry.fromJson(eachCountry));
-    }
-    setState(() {
-      countryNames = countries.map((country) => country.country).toList();
-      countryCities = {
-        for (var country in countries) country.country: country.cities
-      };
-      greeceCities = countryCities['Greece'] ?? [];
-    });
-  }
+  // Future<void> TrainCities() async {
+  //   var response = await http.get(Uri.https('newtickets.hellenictrain',
+  //       'Channels.Website.BFF.WEB/website/place/?name=at'));
+
+  //   var jsonData = jsonDecode(response.body);
+  //   List<Place> cities = [];
+  //   for (var eachCity in jsonData['data']) {
+  //     cities.add(Place.fromJson(eachCity));
+  //   }
+  //   setState(() {
+  //     greeceCities = cities.map((place) => place.name).toList();
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
+    print(greeceCities);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange.shade600,
@@ -147,14 +145,17 @@ class _HomeState extends State<Home> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Autocomplete<String>(
                                   optionsBuilder:
-                                      (TextEditingValue StartValue) {
+                                      (TextEditingValue StartValue) async {
                                     if (StartValue.text == '') {
-                                      return greeceCities;
+                                      return [];
                                     }
-                                    return greeceCities.where((String city) {
-                                      return city.toLowerCase().contains(
-                                          StartValue.text.toLowerCase());
-                                    });
+                                    try {
+                                      return await apiService
+                                          .searchPlacename(StartValue.text);
+                                    } catch (e) {
+                                      print('Error fetching suggestions: $e');
+                                      return [];
+                                    }
                                   },
                                   fieldViewBuilder: (BuildContext context,
                                       startingPoint,

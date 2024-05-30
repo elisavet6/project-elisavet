@@ -1,0 +1,81 @@
+{
+	"info": {
+		"_postman_id": "47c24c07-9d59-4dfc-a1f8-25d3c4eded9f",
+		"name": "OSE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4281813"
+	},
+	"item": [
+		{
+			"name": "Get Available Trips",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept-Language",
+						"value": "el-GR"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"departureLocationId\": 731000415,\r\n    \"arrivalLocationId\": 731000528,\r\n    \"departureTime\": \"2024-05-27T14:45:00.000+03:00\",\r\n    \"adults\": 1,\r\n    \"children\": 0,\r\n    \"criteria\": {\r\n        \"frecceOnly\": false,\r\n        \"regionalOnly\": false,\r\n        \"noChanges\": false,\r\n        \"order\": \"DEPARTURE_DATE\",\r\n        \"offset\": 0,\r\n        \"limit\": 10\r\n    },\r\n    \"advancedSearchRequest\": {\r\n        \"bestFare\": false,\r\n        \"fastPurchase\": false\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://newtickets.hellenictrain.gr/Channels.Website.BFF.WEB/website/ticket/solutions",
+					"protocol": "https",
+					"host": [
+						"newtickets",
+						"hellenictrain",
+						"gr"
+					],
+					"path": [
+						"Channels.Website.BFF.WEB",
+						"website",
+						"ticket",
+						"solutions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Placename",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept-Language",
+						"value": "el-GR"
+					}
+				],
+				"url": {
+					"raw": "https://newtickets.hellenictrain.gr/Channels.Website.BFF.WEB/website/place/?name=Θεσσαλ",
+					"protocol": "https",
+					"host": [
+						"newtickets",
+						"hellenictrain",
+						"gr"
+					],
+					"path": [
+						"Channels.Website.BFF.WEB",
+						"website",
+						"place",
+						""
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "Θεσσαλ"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

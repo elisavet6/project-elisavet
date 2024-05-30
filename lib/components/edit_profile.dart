@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:iq_project/components/TextBox.dart';
 import 'package:iq_project/components/change_password.dart';
 import 'package:iq_project/components/landing_page.dart';
+import 'package:iq_project/components/message_helper.dart';
 
 import 'package:iq_project/services/users.dart';
 import 'package:iq_project/components/login_2.dart';
@@ -53,6 +54,34 @@ class _MyProfileState extends State<MyProfile> {
     }
   }
 
+  Future<void> _selectDate(String field, String value) async {
+    DateTime? _picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(1940),
+        lastDate: DateTime.now());
+
+    if (_picked != null) {
+      setState(() async {
+        // Calculate the age based on the selected date
+        DateTime currentDate = DateTime.now();
+        DateTime minDate =
+            DateTime(currentDate.year - 16, currentDate.month, currentDate.day);
+        int age = currentDate.year - _picked.year;
+
+        // Check if the selected date makes the user younger than 16 years old
+        if (_picked.isAfter(minDate)) {
+          // Show a message if the age is younger than 16 years old
+          ShowMessageHelper.showMessage(
+              context: context,
+              text: "You must be at least 16 years old to register");
+        } else if (value.trim().isNotEmpty) {
+          await usersCollection.doc(currentUser.email).update({field: value});
+        }
+      });
+    }
+  }
+
   Future<void> saveField(String field, String value) async {
     if (value.trim().isNotEmpty) {
       await usersCollection.doc(currentUser.email).update({field: value});
@@ -97,7 +126,7 @@ class _MyProfileState extends State<MyProfile> {
                           onPressed: deleteAccount,
                           child: Text("Delete Account"),
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.red,
+                            backgroundColor: Colors.red,
                             textStyle: TextStyle(color: Colors.white),
                           ),
                         ),
@@ -127,7 +156,7 @@ class _MyProfileState extends State<MyProfile> {
                   EditableTextField(
                     label: 'Birth Date',
                     initialValue: user['date'] ?? '',
-                    onSaved: (value) => saveField('date', value),
+                    onSaved: (value) => _selectDate('date', value),
                   ),
                   EditableTextField(
                     label: 'Phone Number',
@@ -144,7 +173,6 @@ class _MyProfileState extends State<MyProfile> {
                   ),
                   TextButton(
                     onPressed: () {
-                      // await FirebaseAuth.instance.signInAnonymously();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
