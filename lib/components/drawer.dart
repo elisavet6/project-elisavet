@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:iq_project/components/edit_profile.dart';
 import 'package:iq_project/components/landing_page.dart';
 import 'package:iq_project/components/login_2.dart';
@@ -31,7 +32,7 @@ class _MyDrawerState extends State<MyDrawer> {
               color: Colors.white,
             ),
             title: Text(
-              "H O M E",
+              "home".tr(),
               style: TextStyle(color: Colors.white),
             ),
             onTap: () => Navigator.push(
@@ -46,7 +47,7 @@ class _MyDrawerState extends State<MyDrawer> {
               color: Colors.white,
             ),
             title: Text(
-              "P R O F I L E",
+              "profile".tr(),
               style: TextStyle(color: Colors.white),
             ),
             onTap: () => Navigator.push(
@@ -60,8 +61,8 @@ class _MyDrawerState extends State<MyDrawer> {
               Icons.logout,
               color: Colors.white,
             ),
-            title: const Text(
-              "L O G  O U T",
+            title: Text(
+              "logout".tr(),
               style: TextStyle(color: Colors.white),
             ),
             onTap: () async {

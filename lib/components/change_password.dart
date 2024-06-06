@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:iq_project/components/landing_page.dart';
 
 class ChangePassword extends StatefulWidget {
@@ -38,7 +39,7 @@ class _ChangePasswordState extends State<ChangePassword> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Password changed successfully'),
+          content: Text('password_changed_successfully'.tr()),
           backgroundColor: Colors.green,
         ),
       );
@@ -50,7 +51,7 @@ class _ChangePasswordState extends State<ChangePassword> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Something went wrong with your new password'),
+          content: Text('something_went_wrong'.tr()),
           backgroundColor: Colors.red,
         ),
       );
@@ -61,7 +62,7 @@ class _ChangePasswordState extends State<ChangePassword> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("N E W  P A S S W O R D"),
+        title: Text("new_password".tr()),
         backgroundColor: Colors.orange.shade600,
       ),
       body: Center(
@@ -79,7 +80,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                   controller: oldPasswordController,
                   obscureText: passwordVisible,
                   decoration: InputDecoration(
-                    labelText: "Enter your old password",
+                    labelText: "enter_old_password".tr(),
                     floatingLabelStyle:
                         TextStyle(color: Colors.orange.shade700),
                     focusedBorder: UnderlineInputBorder(
@@ -103,7 +104,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your old password';
+                      return 'please_enter_old_password'.tr();
                     }
                     return null;
                   },
@@ -119,7 +120,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                   controller: newPasswordController,
                   obscureText: newPasswordVisible,
                   decoration: InputDecoration(
-                    labelText: "Enter your new password",
+                    labelText: "enter_new_password".tr(),
                     floatingLabelStyle:
                         TextStyle(color: Colors.orange.shade700),
                     focusedBorder: UnderlineInputBorder(
@@ -143,9 +144,9 @@ class _ChangePasswordState extends State<ChangePassword> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your new password';
+                      return 'please_enter_new_password'.tr();
                     } else if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return 'password_min_length'.tr();
                     }
                     return null;
                   },
@@ -161,7 +162,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                   controller: confirmPasswordController,
                   obscureText: confirmPasswordVisible,
                   decoration: InputDecoration(
-                    labelText: "Confirm your new password",
+                    labelText: "confirm_new_password".tr(),
                     floatingLabelStyle:
                         TextStyle(color: Colors.orange.shade700),
                     focusedBorder: UnderlineInputBorder(
@@ -185,9 +186,9 @@ class _ChangePasswordState extends State<ChangePassword> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please confirm your new password';
+                      return 'please_confirm_new_password'.tr();
                     } else if (value != newPasswordController.text) {
-                      return 'Passwords do not match';
+                      return 'passwords_do_not_match'.tr();
                     }
                     return null;
                   },
@@ -200,21 +201,20 @@ class _ChangePasswordState extends State<ChangePassword> {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      // Επαλήθευση του παλαιού κωδικού μέσω Firebase Authentication
                       bool oldPasswordValid = await _verifyOldPassword();
                       if (oldPasswordValid) {
                         await _changePassword();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Old password is incorrect'),
+                            content: Text('old_password_incorrect'.tr()),
                             backgroundColor: Colors.red,
                           ),
                         );
                       }
                     }
                   },
-                  child: Text("Save changes"),
+                  child: Text("save_changes".tr()),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                     fixedSize: Size(300, 50),

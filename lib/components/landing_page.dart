@@ -1,22 +1,38 @@
 import 'dart:convert';
+import 'package:iq_project/components/localization.dart';
 import 'package:iq_project/services/api_ose.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:iq_project/components/drawer.dart';
 import 'package:iq_project/components/custom_button.dart';
-
 import 'package:iq_project/models/train_destinations.dart';
 import 'package:iq_project/services/users.dart';
 
 void main() {
-  runApp(MaterialApp(
-    home: Home(),
-    debugShowCheckedModeBanner: false,
-    title: 'Home Page',
+  runApp(EasyLocalization(
+    supportedLocales: [Locale('el', 'GR'), Locale('en', 'US')],
+    path: 'assets/translations',
+    fallbackLocale: Locale('en', 'US'),
+    child: MyApp(),
   ));
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Home(),
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+      debugShowCheckedModeBanner: false,
+      title: 'Home Page',
+    );
+  }
 }
 
 class Home extends StatefulWidget {
@@ -30,7 +46,8 @@ class _HomeState extends State<Home> {
   final UserServices userServices = UserServices();
   final User? currentUser = FirebaseAuth.instance.currentUser!;
   final ApiService apiService = ApiService();
-
+  String startCity = "";
+  String destCity = "";
   TextEditingController startingPoint = TextEditingController();
   TextEditingController destination = TextEditingController();
   TextEditingController startingDate = TextEditingController();
@@ -51,27 +68,14 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
-  // Future<void> TrainCities() async {
-  //   var response = await http.get(Uri.https('newtickets.hellenictrain',
-  //       'Channels.Website.BFF.WEB/website/place/?name=at'));
-
-  //   var jsonData = jsonDecode(response.body);
-  //   List<Place> cities = [];
-  //   for (var eachCity in jsonData['data']) {
-  //     cities.add(Place.fromJson(eachCity));
-  //   }
-  //   setState(() {
-  //     greeceCities = cities.map((place) => place.name).toList();
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     print(greeceCities);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange.shade600,
-        title: Text("H O M E"),
+        title: Text("home".tr()),
+        actions: [LocalizationCheck()],
       ),
       drawer: MyDrawer(),
       body: StreamBuilder<DocumentSnapshot>(
@@ -98,12 +102,12 @@ class _HomeState extends State<Home> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.asset(
-                          'lib/images/logotry.png',
+                          'assets/images/logotry.png',
                           width: 400,
                           height: 150,
                         ),
                         Text(
-                          'Welcome ' + user!['name'] + '! Book your next trip!',
+                          tr('welcome_message', args: [user!['name']]),
                           style: const TextStyle(
                               wordSpacing: 2,
                               fontSize: 23,
@@ -119,21 +123,21 @@ class _HomeState extends State<Home> {
                           children: [
                             CustomButton(
                                 icon: Icons.airplanemode_active,
-                                text: 'Airplane',
+                                text: tr('airplane'),
                                 onPressed: () {}),
                             SizedBox(
                               width: 5,
                             ),
                             CustomButton(
                                 icon: Icons.train,
-                                text: "Train",
+                                text: tr('train'),
                                 onPressed: () {}),
                             SizedBox(
                               width: 5,
                             ),
                             CustomButton(
                                 icon: directions_boat_outlined,
-                                text: "Ship",
+                                text: tr('ship'),
                                 onPressed: () {}),
                           ],
                         ),
@@ -145,27 +149,33 @@ class _HomeState extends State<Home> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Autocomplete<String>(
                                   optionsBuilder:
-                                      (TextEditingValue StartValue) async {
-                                    if (StartValue.text == '') {
-                                      return [];
+                                      (TextEditingValue startValue) async {
+                                    if (startValue.text.toString() == '') {
+                                      return const Iterable<String>.empty();
                                     }
                                     try {
-                                      return await apiService
-                                          .searchPlacename(StartValue.text);
+                                      return await apiService.searchPlacename(
+                                          startValue.text.toString());
                                     } catch (e) {
                                       print('Error fetching suggestions: $e');
-                                      return [];
+                                      return const Iterable<String>.empty();
                                     }
                                   },
+                                  onSelected: (option) => setState(() {
+                                    startCity = option;
+                                  }),
+                                  initialValue:
+                                      TextEditingValue(text: startCity),
                                   fieldViewBuilder: (BuildContext context,
-                                      startingPoint,
+                                      TextEditingController
+                                          fieldTextEditingController,
                                       FocusNode focusNode,
                                       VoidCallback onFieldSubmitted) {
                                     return TextFormField(
-                                      controller: startingPoint,
+                                      controller: fieldTextEditingController,
                                       focusNode: focusNode,
                                       decoration: InputDecoration(
-                                        labelText: "Starting Point",
+                                        labelText: tr('starting_point'),
                                         floatingLabelStyle: TextStyle(
                                             color: Colors.orange.shade700),
                                         focusedBorder: UnderlineInputBorder(
@@ -187,12 +197,11 @@ class _HomeState extends State<Home> {
                                   size: 30.0,
                                 ),
                                 onPressed: () {
-                                  final temp = destination.text;
-                                  destination.text = startingPoint.text;
-                                  startingPoint.text = temp;
-
-                                  print(startingPoint.text);
-                                  print(destination.text);
+                                  setState(() {
+                                    final temp = destCity;
+                                    destCity = startCity;
+                                    startCity = temp;
+                                  });
                                 },
                               ),
                             ),
@@ -201,24 +210,32 @@ class _HomeState extends State<Home> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Autocomplete<String>(
                                   optionsBuilder:
-                                      (TextEditingValue destinationValue) {
-                                    if (destinationValue.text == '') {
-                                      return greeceCities;
+                                      (TextEditingValue startValue) async {
+                                    if (startValue.text.toString() == '') {
+                                      return const Iterable<String>.empty();
                                     }
-                                    return greeceCities.where((String city) {
-                                      return city.toLowerCase().contains(
-                                          destinationValue.text.toLowerCase());
-                                    });
+                                    try {
+                                      return await apiService.searchPlacename(
+                                          startValue.text.toString());
+                                    } catch (e) {
+                                      print('Error fetching suggestions: $e');
+                                      return const Iterable<String>.empty();
+                                    }
                                   },
-                                  fieldViewBuilder: (BuildContext context,
-                                      destination,
-                                      FocusNode focusNode,
-                                      VoidCallback onFieldSubmitted) {
+                                  onSelected: (option) => setState(() {
+                                    destCity = option;
+                                  }),
+                                  initialValue:
+                                      TextEditingValue(text: destCity),
+                                  fieldViewBuilder: (context,
+                                      fieldTextEditingController,
+                                      focusNode,
+                                      onFieldSubmitted) {
                                     return TextFormField(
-                                      controller: destination,
+                                      controller: fieldTextEditingController,
                                       focusNode: focusNode,
                                       decoration: InputDecoration(
-                                        labelText: "Destination",
+                                        labelText: tr('destination'),
                                         floatingLabelStyle: TextStyle(
                                             color: Colors.orange.shade700),
                                         focusedBorder: UnderlineInputBorder(
@@ -241,7 +258,7 @@ class _HomeState extends State<Home> {
                               width: 10,
                             ),
                             Text(
-                              "From:",
+                              tr('from'),
                               style: TextStyle(color: Colors.grey.shade600),
                             ),
                             IconButton(
@@ -257,7 +274,7 @@ class _HomeState extends State<Home> {
                             ),
                             if (startingDate.text.isNotEmpty)
                               Text(
-                                "Add a return date:",
+                                tr('add_return_date'),
                                 style: TextStyle(color: Colors.grey.shade600),
                               ),
                             if (startingDate.text.isNotEmpty)
@@ -287,16 +304,15 @@ class _HomeState extends State<Home> {
                                 width: 10,
                               ),
                               Text(
-                                "Return:",
+                                tr('return'),
                                 style: TextStyle(color: Colors.grey.shade600),
                               ),
                               IconButton(
-                                onPressed: () {
-                                  _selectReturn();
-                                },
-                                icon: Icon(Icons.calendar_month),
-                                color: Colors.grey.shade600,
-                              ),
+                                  onPressed: () {
+                                    _selectReturn();
+                                  },
+                                  icon: Icon(Icons.calendar_month),
+                                  color: Colors.grey.shade600),
                               Text(destinationDate.text),
                             ],
                           ),

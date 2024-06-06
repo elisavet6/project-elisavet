@@ -1,14 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:iq_project/components/anonymous_home.dart';
 import 'package:iq_project/components/eggrafh.dart';
-import 'package:iq_project/components/landing_page.dart';
-import 'package:iq_project/components/message_helper.dart';
+import 'package:iq_project/components/localization.dart';
 
-import 'package:iq_project/services/users.dart';
+import 'package:iq_project/components/message_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 import 'package:iq_project/components/forgot_pw.dart';
 
@@ -24,6 +21,7 @@ class login extends StatefulWidget {
 }
 
 class _loginState extends State<login> {
+  LocalizationCheck localizationCheck = LocalizationCheck();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,7 +39,14 @@ class _loginState extends State<login> {
               ),
             ),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
+                Tooltip(
+                  message: tr('switch_language'),
+                  child: Padding(
+                      padding: const EdgeInsets.only(right: 3),
+                      child: LocalizationCheck()),
+                ),
                 SizedBox(height: 1),
                 Padding(
                   padding: EdgeInsets.all(10),
@@ -49,7 +54,7 @@ class _loginState extends State<login> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset(
-                        'lib/images/logotry.png',
+                        'assets/images/logotry.png',
                         width: 400,
                         height: 150,
                       ),
@@ -152,7 +157,7 @@ class _YourContentState extends State<YourContent> {
           child: Column(
             children: <Widget>[
               Text(
-                "Sign In",
+                tr('sign_in'),
                 style: TextStyle(
                     color: Colors.orange.shade700, fontSize: 30, height: 2),
               ),
@@ -163,20 +168,16 @@ class _YourContentState extends State<YourContent> {
                     controller: emailcontroll,
                     decoration: InputDecoration(
                       icon: Icon(Icons.person),
-                      hintText: "Enter your email",
+                      hintText: tr('enter_email'),
                     ),
                   ),
-                  SizedBox(
-                    height: 20,
-                  ),
+                  SizedBox(height: 20),
                   TextField(
                     obscureText: passwordVisible,
                     controller: passwordcontroll,
                     decoration: InputDecoration(
-                      icon: Icon(
-                        Icons.vpn_key,
-                      ),
-                      hintText: "Enter your password",
+                      icon: Icon(Icons.vpn_key),
+                      hintText: tr('enter_password'),
                       suffixIcon: IconButton(
                         color: Colors.grey,
                         icon: Icon(
@@ -185,20 +186,16 @@ class _YourContentState extends State<YourContent> {
                               : Icons.visibility_off,
                         ),
                         onPressed: () {
-                          setState(
-                            () {
-                              passwordVisible = !passwordVisible;
-                            },
-                          );
+                          setState(() {
+                            passwordVisible = !passwordVisible;
+                          });
                         },
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(
-                height: 20,
-              ),
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -210,7 +207,7 @@ class _YourContentState extends State<YourContent> {
                       }));
                     },
                     child: Text(
-                      "Forgot your password?",
+                      tr('forgot_password'),
                       style: TextStyle(color: Colors.grey),
                     ),
                   ),
@@ -224,7 +221,7 @@ class _YourContentState extends State<YourContent> {
                   onPressed: () {
                     SignIn();
                   },
-                  child: Text("Sign In"),
+                  child: Text(tr('sign_in_button')),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.all(5),
                     fixedSize: Size(300, 50),
@@ -244,23 +241,22 @@ class _YourContentState extends State<YourContent> {
                   );
                 },
                 child: Text(
-                  'Sign Up',
+                  tr('sign_up'),
                   style: TextStyle(color: Colors.grey),
                 ),
               ),
               TextButton(
                 onPressed: () {
-                  // await FirebaseAuth.instance.signInAnonymously();
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => Anonymous_Home()),
                   );
                 },
                 child: Text(
-                  'or Sign in Anonymously',
+                  tr('or_sign_in_anonymously'),
                   style: TextStyle(color: Colors.grey),
                 ),
-              )
+              ),
             ],
           ),
         ),
