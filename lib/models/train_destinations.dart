@@ -1,11 +1,11 @@
-class Place {
-  final String name;
+class TrainDestination {
+  final String label;
+  final int locationId;
 
-  Place({required this.name});
+  TrainDestination({required this.label, required this.locationId});
 
-  factory Place.fromJson(Map<String, dynamic> json) {
-    return Place(
-      name: json['name'],
-    );
+  factory TrainDestination.fromJson(Map<String, dynamic> json) {
+    return TrainDestination(
+        label: json['label'], locationId: json['locationId']);
   }
 }

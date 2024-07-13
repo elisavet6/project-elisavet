@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:iq_project/components/localization.dart';
+import 'package:iq_project/components/payment.dart';
 import 'package:iq_project/services/api_ose.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:iq_project/components/drawer.dart';
 import 'package:iq_project/components/custom_button.dart';
-import 'package:iq_project/models/train_destinations.dart';
+
 import 'package:iq_project/services/users.dart';
 
 void main() {
@@ -48,29 +49,38 @@ class _HomeState extends State<Home> {
   final ApiService apiService = ApiService();
   String startCity = "";
   String destCity = "";
-  TextEditingController startingPoint = TextEditingController();
+  String startCityId = "";
+  String destCityId = "";
+
   TextEditingController destination = TextEditingController();
   TextEditingController startingDate = TextEditingController();
   TextEditingController destinationDate = TextEditingController();
   DateTime? startDate;
+  DateTime? destDate;
   final user = FirebaseAuth.instance.currentUser!;
   bool isSwitched = false;
-  List<String> greeceCities = [];
 
-  List<String> countryNames = [];
-  Map<String, List<String>> countryCities = {};
-  List<String> cities = [];
   static const IconData directions_boat_outlined =
       IconData(0xefc2, fontFamily: 'MaterialIcons');
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
   }
 
+  void onSearchButtonPressed() {
+    int startId = int.tryParse(startCityId) ?? 0;
+    int destId = int.tryParse(destCityId) ?? 0;
+    DateTime? selectedDate = startDate;
+    apiService.sendRequest(startId, destId, selectedDate!);
+    print({selectedDate});
+    print(startId);
+    print(destId);
+  }
+
   @override
   Widget build(BuildContext context) {
-    print(greeceCities);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange.shade600,
@@ -110,7 +120,7 @@ class _HomeState extends State<Home> {
                           tr('welcome_message', args: [user!['name']]),
                           style: const TextStyle(
                               wordSpacing: 2,
-                              fontSize: 23,
+                              fontSize: 17,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                               height: 3),
@@ -147,32 +157,37 @@ class _HomeState extends State<Home> {
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Autocomplete<String>(
-                                  optionsBuilder:
-                                      (TextEditingValue startValue) async {
-                                    if (startValue.text.toString() == '') {
-                                      return const Iterable<String>.empty();
+                                child: Autocomplete<Map<String, String>>(
+                                  optionsBuilder: (TextEditingValue
+                                      textEditingValue) async {
+                                    if (textEditingValue.text.isEmpty) {
+                                      return const Iterable<
+                                          Map<String, String>>.empty();
                                     }
                                     try {
                                       return await apiService.searchPlacename(
-                                          startValue.text.toString());
+                                          textEditingValue.text);
                                     } catch (e) {
                                       print('Error fetching suggestions: $e');
-                                      return const Iterable<String>.empty();
+                                      return const Iterable<
+                                          Map<String, String>>.empty();
                                     }
                                   },
+                                  //ti tha emfanizetai sto dropdown
+                                  displayStringForOption: (option) =>
+                                      option['label']!,
+
                                   onSelected: (option) => setState(() {
-                                    startCity = option;
+                                    startCity = option['label'] as String;
+                                    startCityId =
+                                        option['locationId'].toString();
                                   }),
                                   initialValue:
                                       TextEditingValue(text: startCity),
-                                  fieldViewBuilder: (BuildContext context,
-                                      TextEditingController
-                                          fieldTextEditingController,
-                                      FocusNode focusNode,
-                                      VoidCallback onFieldSubmitted) {
+                                  fieldViewBuilder: (context, controller,
+                                      focusNode, onEditingComplete) {
                                     return TextFormField(
-                                      controller: fieldTextEditingController,
+                                      controller: controller,
                                       focusNode: focusNode,
                                       decoration: InputDecoration(
                                         labelText: tr('starting_point'),
@@ -198,9 +213,12 @@ class _HomeState extends State<Home> {
                                 ),
                                 onPressed: () {
                                   setState(() {
-                                    final temp = destCity;
+                                    final tempCity = destCity;
+                                    final tempCityId = destCityId;
                                     destCity = startCity;
-                                    startCity = temp;
+                                    destCityId = startCityId;
+                                    startCity = tempCity;
+                                    startCityId = tempCityId;
                                   });
                                 },
                               ),
@@ -208,31 +226,35 @@ class _HomeState extends State<Home> {
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Autocomplete<String>(
-                                  optionsBuilder:
-                                      (TextEditingValue startValue) async {
-                                    if (startValue.text.toString() == '') {
-                                      return const Iterable<String>.empty();
+                                child: Autocomplete<Map<String, String>>(
+                                  optionsBuilder: (TextEditingValue
+                                      textEditingValue) async {
+                                    if (textEditingValue.text.isEmpty) {
+                                      return const Iterable<
+                                          Map<String, String>>.empty();
                                     }
                                     try {
                                       return await apiService.searchPlacename(
-                                          startValue.text.toString());
+                                          textEditingValue.text);
                                     } catch (e) {
                                       print('Error fetching suggestions: $e');
-                                      return const Iterable<String>.empty();
+                                      return const Iterable<
+                                          Map<String, String>>.empty();
                                     }
                                   },
+                                  displayStringForOption: (option) =>
+                                      option['label']!,
                                   onSelected: (option) => setState(() {
-                                    destCity = option;
+                                    destCity = option['label'] as String;
+                                    destCityId =
+                                        option['locationId'].toString();
                                   }),
                                   initialValue:
                                       TextEditingValue(text: destCity),
-                                  fieldViewBuilder: (context,
-                                      fieldTextEditingController,
-                                      focusNode,
-                                      onFieldSubmitted) {
+                                  fieldViewBuilder: (context, controller,
+                                      focusNode, onEditingComplete) {
                                     return TextFormField(
-                                      controller: fieldTextEditingController,
+                                      controller: controller,
                                       focusNode: focusNode,
                                       decoration: InputDecoration(
                                         labelText: tr('destination'),
@@ -269,9 +291,9 @@ class _HomeState extends State<Home> {
                               color: Colors.grey.shade600,
                             ),
                             Text(startingDate.text),
-                            SizedBox(
-                              width: 130,
-                            ),
+                            // SizedBox(
+                            //   width: 130,
+                            // ),
                             if (startingDate.text.isNotEmpty)
                               Text(
                                 tr('add_return_date'),
@@ -290,6 +312,7 @@ class _HomeState extends State<Home> {
                                     } else {
                                       setState(() {
                                         destinationDate.clear();
+                                        isSwitched = false;
                                       });
                                     }
                                   }),
@@ -299,10 +322,6 @@ class _HomeState extends State<Home> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              SizedBox(
-                                height: 5,
-                                width: 10,
-                              ),
                               Text(
                                 tr('return'),
                                 style: TextStyle(color: Colors.grey.shade600),
@@ -316,6 +335,36 @@ class _HomeState extends State<Home> {
                               Text(destinationDate.text),
                             ],
                           ),
+                        ElevatedButton(
+                          onPressed: onSearchButtonPressed,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange.shade700,
+                            fixedSize: Size(200, 40),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: Text(
+                            tr('search_trips'),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const payment())),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange.shade700,
+                            fixedSize: Size(200, 40),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: Text(tr("checkout")),
+                        ),
                       ],
                     ),
                   ),
@@ -327,7 +376,7 @@ class _HomeState extends State<Home> {
               child: Text('Error: ${snapshot.error}'),
             );
           }
-          print(startingPoint);
+
           return const Center(
             child: CircularProgressIndicator(),
           );
@@ -340,16 +389,18 @@ class _HomeState extends State<Home> {
     DateTime currentDate = DateTime.now();
     DateTime maxDate =
         DateTime(currentDate.year + 2, currentDate.month, currentDate.day);
-    DateTime? _picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime.now(),
-        lastDate: maxDate);
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: maxDate,
+    );
 
-    if (_picked != null) {
+    if (picked != null) {
       setState(() {
-        startDate = _picked;
-        startingDate.text = _picked.toString().split(" ")[0];
+        _selectedDate = picked;
+        startDate = picked;
+        startingDate.text = DateFormat('yyyy-MM-dd').format(picked);
       });
     }
   }
@@ -365,7 +416,8 @@ class _HomeState extends State<Home> {
 
     if (_picked != null) {
       setState(() {
-        destinationDate.text = _picked.toString().split(" ")[0];
+        destDate = _picked;
+        destinationDate.text = DateFormat('yyyy-MM-dd').format(_picked);
       });
     }
   }

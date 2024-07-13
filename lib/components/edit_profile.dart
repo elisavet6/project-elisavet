@@ -1,13 +1,16 @@
+import 'dart:typed_data';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:iq_project/components/TextBox.dart';
 import 'package:iq_project/components/change_password.dart';
 import 'package:iq_project/components/landing_page.dart';
 import 'package:iq_project/components/message_helper.dart';
-
 import 'package:iq_project/services/users.dart';
 import 'package:iq_project/components/login_2.dart';
+import 'package:image_picker/image_picker.dart';
 
 class MyProfile extends StatefulWidget {
   @override
@@ -16,33 +19,82 @@ class MyProfile extends StatefulWidget {
 
 class _MyProfileState extends State<MyProfile> {
   final UserServices userServices = UserServices();
-  final currentUser = FirebaseAuth.instance.currentUser!;
-  final usersCollection = FirebaseFirestore.instance.collection('Users');
+  final User currentUser = FirebaseAuth.instance.currentUser!;
+  final CollectionReference usersCollection =
+      FirebaseFirestore.instance.collection('Users');
   Map<String, dynamic>? userData;
+  Uint8List? _image;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    getProfilePicture();
+  }
+
+  Future<void> selectImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image == null) {
+      return ShowMessageHelper.showMessage(
+          context: context, text: tr("no_photo"));
+    }
+
+    try {
+      final String userEmail = currentUser.email ?? "unknown_user";
+      final storageRef = _storage.ref();
+      final imageRef = storageRef.child(userEmail);
+      final imageBytes = await image.readAsBytes();
+      await imageRef.putData(imageBytes);
+      setState(() {
+        _image = imageBytes;
+      });
+    } catch (e) {
+      print("Error uploading image: $e");
+    }
+  }
+
+  Future<void> getProfilePicture() async {
+    final String userEmail = currentUser.email ?? "unknown_user";
+    try {
+      final storageRef = _storage.ref().child(userEmail);
+      print("Fetching image for: $userEmail");
+      final imageBytes = await storageRef.getData();
+      if (imageBytes != null) {
+        setState(() {
+          _image = imageBytes;
+        });
+      } else {
+        print('No profile picture found');
+      }
+    } catch (e) {
+      print('Error fetching profile picture: $e');
+    }
+  }
 
   Future<void> deleteAccount() async {
     bool confirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          "Confirm Delete",
+          tr("confirm_delete"),
           style: TextStyle(color: Colors.orange),
         ),
-        content: Text("Are you sure you want to delete your account?"),
+        content: Text(tr("delete_account_confirmation")),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel'),
+            child: Text(tr("cancel")),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Delete'),
+            child: Text(tr("delete")),
           ),
         ],
       ),
     );
 
-    if (confirm != null && confirm) {
+    if (confirm) {
       try {
         await userServices.deleteUser(currentUser.email!);
         await currentUser.delete();
@@ -62,23 +114,17 @@ class _MyProfileState extends State<MyProfile> {
         lastDate: DateTime.now());
 
     if (_picked != null) {
-      setState(() async {
-        // Calculate the age based on the selected date
-        DateTime currentDate = DateTime.now();
-        DateTime minDate =
-            DateTime(currentDate.year - 16, currentDate.month, currentDate.day);
-        int age = currentDate.year - _picked.year;
+      DateTime currentDate = DateTime.now();
+      DateTime minDate =
+          DateTime(currentDate.year - 16, currentDate.month, currentDate.day);
+      int age = currentDate.year - _picked.year;
 
-        // Check if the selected date makes the user younger than 16 years old
-        if (_picked.isAfter(minDate)) {
-          // Show a message if the age is younger than 16 years old
-          ShowMessageHelper.showMessage(
-              context: context,
-              text: "You must be at least 16 years old to register");
-        } else if (value.trim().isNotEmpty) {
-          await usersCollection.doc(currentUser.email).update({field: value});
-        }
-      });
+      if (_picked.isAfter(minDate)) {
+        ShowMessageHelper.showMessage(
+            context: context, text: tr("age_restriction_message"));
+      } else if (value.trim().isNotEmpty) {
+        await usersCollection.doc(currentUser.email).update({field: value});
+      }
     }
   }
 
@@ -92,7 +138,7 @@ class _MyProfileState extends State<MyProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("M Y  P R O F I L E"),
+          title: Text(tr("my_profile")),
           backgroundColor: Colors.orange.shade600,
         ),
         body: StreamBuilder<DocumentSnapshot>(
@@ -105,7 +151,30 @@ class _MyProfileState extends State<MyProfile> {
                 final user = snapshot.data!.data() as Map<String, dynamic>?;
                 return ListView(children: [
                   SizedBox(height: 20),
-                  Icon(Icons.person, size: 60),
+                  Center(
+                    child: Stack(
+                      children: [
+                        _image != null
+                            ? CircleAvatar(
+                                radius: 64,
+                                backgroundImage: Image.memory(_image!).image,
+                              )
+                            : CircleAvatar(
+                                radius: 64,
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                                child: Icon(Icons.person, size: 80),
+                              ),
+                        Positioned(
+                          child: IconButton(
+                              onPressed: selectImage,
+                              icon: const Icon(Icons.add_a_photo)),
+                          bottom: -10,
+                          left: 80,
+                        )
+                      ],
+                    ),
+                  ),
                   SizedBox(height: 20),
                   Text(
                     user!['email'],
@@ -120,11 +189,11 @@ class _MyProfileState extends State<MyProfile> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('My Details',
+                        Text(tr("my_details"),
                             style: TextStyle(color: Colors.grey)),
                         ElevatedButton(
                           onPressed: deleteAccount,
-                          child: Text("Delete Account"),
+                          child: Text(tr("delete_account")),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             textStyle: TextStyle(color: Colors.white),
@@ -134,37 +203,37 @@ class _MyProfileState extends State<MyProfile> {
                     ),
                   ),
                   EditableTextField(
-                    label: 'First Name',
+                    label: tr("first_name"),
                     initialValue: user['name'] ?? '',
                     onSaved: (value) => saveField('name', value),
                   ),
                   EditableTextField(
-                    label: 'Last Name',
+                    label: tr("last_name"),
                     initialValue: user['lastname'] ?? '',
                     onSaved: (value) => saveField('lastname', value),
                   ),
                   EditableTextField(
-                    label: 'Country',
+                    label: tr("country"),
                     initialValue: user['country'] ?? '',
                     onSaved: (value) => saveField('country', value),
                   ),
                   EditableTextField(
-                    label: 'City',
+                    label: tr("city"),
                     initialValue: user['city'] ?? '',
                     onSaved: (value) => saveField('city', value),
                   ),
                   EditableTextField(
-                    label: 'Birth Date',
+                    label: tr("birth_date"),
                     initialValue: user['date'] ?? '',
                     onSaved: (value) => _selectDate('date', value),
                   ),
                   EditableTextField(
-                    label: 'Phone Number',
+                    label: tr("phone_number"),
                     initialValue: user['phoneNumber'] ?? '',
                     onSaved: (value) => saveField('phoneNumber', value),
                   ),
                   EditableTextField(
-                    label: 'Language',
+                    label: tr("language"),
                     initialValue: user['language'] ?? '',
                     onSaved: (value) => saveField('language', value),
                   ),
@@ -180,7 +249,7 @@ class _MyProfileState extends State<MyProfile> {
                       );
                     },
                     child: Text(
-                      "Do you want to change your password?",
+                      tr("change_password_prompt"),
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                   ),
@@ -195,7 +264,7 @@ class _MyProfileState extends State<MyProfile> {
                           MaterialPageRoute(builder: (context) => Home()),
                         );
                       },
-                      child: Text("Save changes"),
+                      child: Text(tr("save_changes")),
                       style: ElevatedButton.styleFrom(
                         padding:
                             EdgeInsets.symmetric(horizontal: 40, vertical: 10),
@@ -211,7 +280,7 @@ class _MyProfileState extends State<MyProfile> {
                 ]);
               } else if (snapshot.hasError) {
                 return Center(
-                  child: Text('Error: ${snapshot.error}'),
+                  child: Text('${tr("error")}: ${snapshot.error}'),
                 );
               }
               return const Center(

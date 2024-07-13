@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csc_picker/model/select_status_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:iq_project/components/landing_page.dart';
+import 'package:iq_project/components/localization.dart';
 import 'package:iq_project/components/login_2.dart';
 import 'package:iq_project/components/message_helper.dart';
 import 'package:http/http.dart' as http;
@@ -98,11 +100,11 @@ class _SignUpFormState extends State<SignUpForm> {
           );
         } else {
           ShowMessageHelper.showMessage(
-              context: context, text: "The confirmed password doesn't match");
+              context: context, text: tr("password_confirm_error"));
         }
       } catch (e) {
         ShowMessageHelper.showMessage(
-            context: context, text: "Failed to sign up: $e");
+            context: context, text: "${tr("signup_failed")}: $e");
       }
     }
   }
@@ -129,28 +131,16 @@ class _SignUpFormState extends State<SignUpForm> {
     getCountries();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign Up'),
+        title: Text(tr('sign_up')),
         backgroundColor: Colors.orange.shade700,
         actions: [
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Text(
-                'Are you a member?',
-                style: TextStyle(fontSize: 15),
+              Padding(
+                padding: EdgeInsets.only(right: 5),
+                child: LocalizationCheck(),
               ),
-              TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => login_2()),
-                    );
-                  },
-                  child: const Text('Sign In',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          decoration: TextDecoration.underline)))
             ],
           ),
         ],
@@ -165,10 +155,28 @@ class _SignUpFormState extends State<SignUpForm> {
               child: Column(
                 children: <Widget>[
                   SizedBox(height: 30),
+                  Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                    Text(
+                      tr("are_you_member"),
+                      style: TextStyle(fontSize: 15, color: Colors.grey),
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => login_2()),
+                          );
+                        },
+                        child: Text(tr("sign_in"),
+                            style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 15,
+                                decoration: TextDecoration.underline))),
+                  ]),
                   TextFormField(
                     controller: namecontroller,
                     decoration: InputDecoration(
-                      labelText: "First Name *",
+                      labelText: tr("first_name"),
                       floatingLabelStyle:
                           TextStyle(color: Colors.orange.shade700),
                       focusedBorder: UnderlineInputBorder(
@@ -177,7 +185,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Enter your First Name';
+                        return tr("enter_first_name");
                       }
                       return null;
                     },
@@ -186,7 +194,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   TextFormField(
                     controller: lastNamecontroller,
                     decoration: InputDecoration(
-                      labelText: "Last Name *",
+                      labelText: tr("last_name"),
                       floatingLabelStyle:
                           TextStyle(color: Colors.orange.shade700),
                       focusedBorder: UnderlineInputBorder(
@@ -195,7 +203,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Enter your Last Name';
+                        return tr("enter_last_name");
                       }
                       return null;
                     },
@@ -204,7 +212,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   TextFormField(
                     controller: datecontroller,
                     decoration: InputDecoration(
-                      labelText: "Birth Date *",
+                      labelText: tr("birth_date"),
                       filled: true,
                       prefixIcon: Icon(
                         Icons.calendar_month,
@@ -223,7 +231,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     maxLength: 10,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Enter your Birth Date';
+                        return tr("enter_birth_date");
                       }
                       return null;
                     },
@@ -252,7 +260,7 @@ class _SignUpFormState extends State<SignUpForm> {
                         controller: countrycontroller,
                         focusNode: focusNode,
                         decoration: InputDecoration(
-                          labelText: "Country *",
+                          labelText: tr("country"),
                           floatingLabelStyle:
                               TextStyle(color: Colors.orange.shade700),
                           focusedBorder: UnderlineInputBorder(
@@ -286,7 +294,7 @@ class _SignUpFormState extends State<SignUpForm> {
                         controller: citycontroller,
                         focusNode: focusNode,
                         decoration: InputDecoration(
-                          labelText: "City *",
+                          labelText: tr("city"),
                           floatingLabelStyle:
                               TextStyle(color: Colors.orange.shade700),
                           focusedBorder: UnderlineInputBorder(
@@ -301,7 +309,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   TextFormField(
                     controller: languagecontroller,
                     decoration: InputDecoration(
-                      labelText: "Language *",
+                      labelText: tr("language"),
                       floatingLabelStyle:
                           TextStyle(color: Colors.orange.shade700),
                       focusedBorder: UnderlineInputBorder(
@@ -310,7 +318,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Enter your Language';
+                        return tr("enter_language");
                       }
                       return null;
                     },
@@ -319,7 +327,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   TextFormField(
                     controller: phoneNumbercontroller,
                     decoration: InputDecoration(
-                        labelText: "Phone Number *",
+                        labelText: tr("phone_number"),
                         floatingLabelStyle:
                             TextStyle(color: Colors.orange.shade700),
                         focusedBorder: UnderlineInputBorder(
@@ -369,7 +377,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   TextFormField(
                     controller: emailcontroller,
                     decoration: InputDecoration(
-                      labelText: "e-mail *",
+                      labelText: tr("email"),
                       floatingLabelStyle:
                           TextStyle(color: Colors.orange.shade700),
                       focusedBorder: UnderlineInputBorder(
@@ -378,7 +386,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Enter your e-mail';
+                        return tr("enter_email");
                       }
                       return null;
                     },
@@ -388,7 +396,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     controller: passwordcontroller,
                     obscureText: passwordVisible,
                     decoration: InputDecoration(
-                      labelText: "Password *",
+                      labelText: tr("password"),
                       floatingLabelStyle:
                           TextStyle(color: Colors.orange.shade700),
                       focusedBorder: UnderlineInputBorder(
@@ -410,7 +418,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Enter your password';
+                        return tr("enter_password");
                       } else if (value.length < 6) {
                         return 'Your password must be at least 6 characters';
                       }
@@ -422,7 +430,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     controller: confirmPwcontroller,
                     obscureText: confirmVisible,
                     decoration: InputDecoration(
-                      labelText: "Confirm Password *",
+                      labelText: tr("confirm_password"),
                       floatingLabelStyle:
                           TextStyle(color: Colors.orange.shade700),
                       focusedBorder: UnderlineInputBorder(
@@ -442,63 +450,54 @@ class _SignUpFormState extends State<SignUpForm> {
                         },
                       ),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Enter your First Name';
-                      }
-                      return null;
-                    },
                   ),
                   SizedBox(height: 35),
                   ElevatedButton(
                     onPressed: () {
                       if (namecontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
-                            context: context,
-                            text: "Please enter your First Name!");
+                            context: context, text: tr("enter_first_name"));
                       } else if (lastNamecontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
-                            context: context,
-                            text: "Please enter your Last Name!");
+                            context: context, text: tr("enter_last_name"));
                       } else if (datecontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
-                            context: context,
-                            text: "Please enter your birth date!");
+                            context: context, text: tr("enter_birth_date"));
                       } else if (countrycontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
-                            context: context,
-                            text: "Please enter your country!");
+                            context: context, text: tr("enter_country"));
                       } else if (languagecontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
-                            context: context,
-                            text: "Please enter your language!");
+                            context: context, text: tr("enter_language"));
                       } else if (citycontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
-                            context: context, text: "Please enter your City");
+                            context: context, text: tr("enter_city"));
                       } else if (phoneNumbercontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
-                            context: context,
-                            text: "Please enter your phone number!");
+                            context: context, text: tr("enter_phone_number"));
                       } else if (emailcontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
-                            context: context, text: "Please enter your email!");
+                            context: context, text: tr("enter_email"));
                       } else if (passwordcontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
-                            context: context, text: "Please enter a password!");
+                            context: context, text: tr("enter_password"));
                       } else if (passwordcontroller.text.length < 6) {
                         ShowMessageHelper.showMessage(
-                            context: context,
-                            text:
-                                "Your password has to be at least 6 numbers or letters!");
+                            context: context, text: tr("min_password"));
                       } else if (confirmPwcontroller.text.isEmpty) {
                         ShowMessageHelper.showMessage(
                             context: context,
-                            text: "Please confirm your password!");
-                      } else {
+                            text: tr("enter_confirm_password"));
+                      }
+                      //  else if (confirmPwcontroller != passwordcontroller) {
+                      //   ShowMessageHelper.showMessage(
+                      //       context: context, text: tr("password_mismatch"));
+                      // }
+                      else {
                         signUp();
                       }
                     },
-                    child: Text('Sign Up'),
+                    child: Text(tr("sign_up")),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange.shade700,
                       fixedSize: Size(300, 50),
@@ -534,9 +533,7 @@ class _SignUpFormState extends State<SignUpForm> {
         // Check if the selected date makes the user younger than 16 years old
         if (_picked.isAfter(minDate)) {
           // Show a message if the age is younger than 16 years old
-          ShowMessageHelper.showMessage(
-              context: context,
-              text: "You must be at least 16 years old to register");
+          ShowMessageHelper.showMessage(context: context, text: tr("min_age"));
         } else {
           // Update the text field if the age is valid
           datecontroller.text = _picked.toString().split(" ")[0];
