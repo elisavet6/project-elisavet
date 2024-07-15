@@ -29,6 +29,7 @@ class ApiService {
                 'label': place['label'] as String
               })
           .toList();
+
       print('Parsed places: $places');
       return places;
     } else {
