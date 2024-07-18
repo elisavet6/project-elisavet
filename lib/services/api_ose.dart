@@ -39,10 +39,7 @@ class ApiService {
   // }
 
   Future<List<Map<String, String>>> searchPlacename(String name) async {
-    var headers = {
-      'Accept-Language': 'el-GR',
-      "Access-Control-Allow-Origin": "*"
-    };
+    var headers = {'Accept-Language': 'el-GR'};
     var paramName = Uri.encodeFull(name);
     var url = Uri.parse(
         'https://newtickets.hellenictrain.gr/Channels.Website.BFF.WEB/website/place/?name=$paramName');
