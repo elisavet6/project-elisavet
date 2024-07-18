@@ -1,16 +1,12 @@
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:iq_project/components/custom_button.dart';
+import 'package:iq_project/components/drawer.dart';
 import 'package:iq_project/components/localization.dart';
 import 'package:iq_project/components/payment.dart';
 import 'package:iq_project/services/api_ose.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:easy_localization/easy_localization.dart';
-import 'package:iq_project/components/drawer.dart';
-import 'package:iq_project/components/custom_button.dart';
-
 import 'package:iq_project/services/users.dart';
 
 void main() {
@@ -160,7 +156,7 @@ class _HomeState extends State<Home> {
                                 child: Autocomplete<Map<String, String>>(
                                   optionsBuilder: (TextEditingValue
                                       textEditingValue) async {
-                                    if (textEditingValue.text.isEmpty) {
+                                    if (textEditingValue.text.length < 3) {
                                       return const Iterable<
                                           Map<String, String>>.empty();
                                     }
@@ -229,7 +225,7 @@ class _HomeState extends State<Home> {
                                 child: Autocomplete<Map<String, String>>(
                                   optionsBuilder: (TextEditingValue
                                       textEditingValue) async {
-                                    if (textEditingValue.text.isEmpty) {
+                                    if (textEditingValue.text.length < 3) {
                                       return const Iterable<
                                           Map<String, String>>.empty();
                                     }
