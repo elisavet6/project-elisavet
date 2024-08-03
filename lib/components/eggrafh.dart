@@ -8,6 +8,7 @@ import 'package:fl_country_code_picker/fl_country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:iq_project/components/landing_page.dart';
 import 'package:iq_project/components/localization.dart';
+import 'package:iq_project/components/login.dart';
 import 'package:iq_project/components/login_2.dart';
 import 'package:iq_project/components/message_helper.dart';
 import 'package:http/http.dart' as http;
@@ -164,7 +165,7 @@ class _SignUpFormState extends State<SignUpForm> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => login_2()),
+                            MaterialPageRoute(builder: (context) => login()),
                           );
                         },
                         child: Text(tr("sign_in"),

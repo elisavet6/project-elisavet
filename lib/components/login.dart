@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:iq_project/components/anonymous_home.dart';
 import 'package:iq_project/components/eggrafh.dart';
+import 'package:iq_project/components/landing_page.dart';
 import 'package:iq_project/components/localization.dart';
 
 import 'package:iq_project/components/message_helper.dart';
@@ -85,7 +85,7 @@ class _loginState extends State<login> {
                 else
                   Expanded(
                     child: Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.all(
                           Radius.circular(60),
@@ -119,6 +119,11 @@ class _YourContentState extends State<YourContent> {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailcontroll.text.trim(),
         password: passwordcontroll.text.trim(),
+      );
+      // ignore: use_build_context_synchronously
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const Home()),
       );
     } catch (e) {
       String errorMessage = 'An error occurred';
@@ -249,7 +254,7 @@ class _YourContentState extends State<YourContent> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Anonymous_Home()),
+                    MaterialPageRoute(builder: (context) => Home()),
                   );
                 },
                 child: Text(

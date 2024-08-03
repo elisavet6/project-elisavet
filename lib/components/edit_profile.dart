@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:iq_project/components/TextBox.dart';
 import 'package:iq_project/components/change_password.dart';
 import 'package:iq_project/components/landing_page.dart';
+import 'package:iq_project/components/login.dart';
 import 'package:iq_project/components/login_2.dart';
 import 'package:iq_project/components/message_helper.dart';
 import 'package:iq_project/services/users.dart';
@@ -24,8 +26,10 @@ class _MyProfileState extends State<MyProfile> {
       FirebaseFirestore.instance.collection('Users');
   Map<String, dynamic>? userData;
   Uint8List? _image;
+  File? image;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   String? _imageUrl;
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -46,7 +50,10 @@ class _MyProfileState extends State<MyProfile> {
           _storage.ref().child("profile_pictures/${currentUser.uid}");
       final imageBytes = await image.readAsBytes();
       await storageRef.putData(imageBytes);
-      setState(() => _image = imageBytes);
+      setState(() {
+        _image = imageBytes;
+      });
+      await getProfilePicture(); // Fetch and update the profile picture URL after upload
     } catch (e) {
       print('Error uploading image: ${e.toString()}');
     }
@@ -57,7 +64,10 @@ class _MyProfileState extends State<MyProfile> {
         _storage.ref().child("profile_pictures/${currentUser.uid}");
     try {
       final imageUrl = await storageRef.getDownloadURL();
-      setState(() => _imageUrl = imageUrl);
+      print('Fetched image URL: $imageUrl'); // Log the fetched image URL
+      setState(() {
+        _imageUrl = imageUrl;
+      });
     } catch (e) {
       print('Error fetching profile picture: ${e.toString()}');
     }
@@ -85,8 +95,9 @@ class _MyProfileState extends State<MyProfile> {
       try {
         await userServices.deleteUser(currentUser.email!);
         await currentUser.delete();
+        // ignore: use_build_context_synchronously
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => login_2()));
+            context, MaterialPageRoute(builder: (context) => login()));
       } catch (e) {
         print("Error deleting account: $e");
       }
@@ -142,9 +153,21 @@ class _MyProfileState extends State<MyProfile> {
                   child: Stack(
                     children: [
                       _imageUrl != null
-                          ? CircleAvatar(
-                              radius: 64,
-                              backgroundImage: NetworkImage(_imageUrl!),
+                          ? ClipOval(
+                              child: Image.network(
+                                _imageUrl!,
+                                fit: BoxFit.cover,
+                                width: 128,
+                                height: 128,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return CircleAvatar(
+                                    radius: 64,
+                                    backgroundColor: Colors.orange,
+                                    foregroundColor: Colors.white,
+                                    child: Icon(Icons.person, size: 80),
+                                  );
+                                },
+                              ),
                             )
                           : CircleAvatar(
                               radius: 64,

@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:iq_project/components/login.dart';
 import 'package:iq_project/components/login_2.dart';
 import 'services/firebase_options.dart';
 import 'package:firebase_storage/firebase_storage.dart';

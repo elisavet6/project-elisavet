@@ -72,5 +72,14 @@
   "checkout":"Checkout",
   "search_trips":"Search",
   "pay":"Pay Now",
-  "no_photo":"No Image selected"
+  "no_photo":"No Image selected",
+  "no_results":"There are no available trips",
+  "departure": "Departure:",
+  "return":"Return:",
+  "departure_date":"Select a departure date",
+  "return_date":"Select a return date",
+  "enter_departure":"Enter a departure city",
+  "enter_destination":"Enter your destination",
+  "number_of_adults": "Adults:",
+  "go_to_cart": "Checkout"
   }
